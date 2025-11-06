@@ -13,7 +13,7 @@ const Header: React.FC = () => {
   const [showTrackingModal, setShowTrackingModal] = useState(false);
 
   return (
-    <header className="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+    <header className="navbar bg-base-100 shadow-lg sticky top-0 z-20">
       <div className="navbar-start">
         <div className="dropdown">
           <button onClick={() => setShowMobileMenu(true)} className="btn btn-ghost lg:hidden">

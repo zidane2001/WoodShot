@@ -30,13 +30,26 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const { dispatch } = useCart();
 
-  // Mock additional images
+  // Use main product image and fallback to appropriate wood image
   const images = [
-    product.imageUrl || '/placeholder-wood.jpg',
-    '/wood-detail-1.jpg',
-    '/wood-detail-2.jpg',
-    '/wood-detail-3.jpg'
+    product.imageUrl || getFallbackImage(product.woodType),
+    getFallbackImage(product.woodType),
+    getFallbackImage(product.woodType),
+    getFallbackImage(product.woodType)
   ];
+
+  function getFallbackImage(woodType: string): string {
+    const fallbacks: { [key: string]: string } = {
+      'oak': '/photos/boisChauffageChêne.png',
+      'beech': '/photos/boisChauffageBou.png',
+      'birch': '/photos/boisChauffageBouleau.png',
+      'pine': '/photos/boisChauffageChêne.png',
+      'maple': '/photos/boisChauffageBouleau.png',
+      'ash': '/photos/boisChauffageChêne.png',
+      'mixed': '/photos/image copy 2.png'
+    };
+    return fallbacks[woodType] || '/photos/boisChauffageChêne.png';
+  }
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
@@ -68,6 +81,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }) => {
 
   return (
     <div className="modal modal-open">
+      <div className="modal-backdrop" onClick={onClose}></div>
       <div className="modal-box max-w-4xl">
         <button
           className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
@@ -105,7 +119,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }) => {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder-wood.jpg';
+                      target.src = getFallbackImage(product.woodType);
                     }}
                   />
                 </button>

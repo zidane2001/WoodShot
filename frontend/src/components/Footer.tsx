@@ -1,18 +1,18 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-base-200 text-base-content">
-      {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-base-300 text-base-content">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Company Info */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-content font-bold text-sm">W</span>
               </div>
-              <span className="text-xl font-bold">WoodShot</span>
+              <span className="text-lg font-bold">WoodShot</span>
             </div>
             <p className="text-sm text-base-content/70 leading-relaxed">
               Votre partenaire de confiance pour le bois de chauffage de qualité.
@@ -27,32 +27,30 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Services */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Nos Services</h3>
-            <ul className="space-y-2">
+          <div className="space-y-3">
+            <h3 className="text-base font-semibold">Nos Services</h3>
+            <ul className="space-y-1">
               <li><a href="#" className="text-sm text-base-content/70 hover:text-primary transition-colors">🚚 Livraison à domicile</a></li>
               <li><a href="#" className="text-sm text-base-content/70 hover:text-primary transition-colors">💡 Conseils personnalisés</a></li>
               <li><a href="#" className="text-sm text-base-content/70 hover:text-primary transition-colors">🛠️ Support technique</a></li>
               <li><a href="#" className="text-sm text-base-content/70 hover:text-primary transition-colors">✅ Garantie qualité</a></li>
-              <li><a href="#" className="text-sm text-base-content/70 hover:text-primary transition-colors">📦 Stockage sécurisé</a></li>
             </ul>
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Liens Rapides</h3>
-            <ul className="space-y-2">
-              <li><a href="/" className="text-sm text-base-content/70 hover:text-primary transition-colors">🏠 Accueil</a></li>
-              <li><a href="/about" className="text-sm text-base-content/70 hover:text-primary transition-colors">ℹ️ À propos</a></li>
-              <li><a href="/contact" className="text-sm text-base-content/70 hover:text-primary transition-colors">📞 Contact</a></li>
+          <div className="space-y-3">
+            <h3 className="text-base font-semibold">Liens Rapides</h3>
+            <ul className="space-y-1">
+              <li><Link to="/" className="text-sm text-base-content/70 hover:text-primary transition-colors">🏠 Accueil</Link></li>
+              <li><Link to="/about" className="text-sm text-base-content/70 hover:text-primary transition-colors">ℹ️ À propos</Link></li>
+              <li><Link to="/contact" className="text-sm text-base-content/70 hover:text-primary transition-colors">📞 Contact</Link></li>
               <li><a href="#" className="text-sm text-base-content/70 hover:text-primary transition-colors">📋 Devis gratuit</a></li>
-              <li><a href="#" className="text-sm text-base-content/70 hover:text-primary transition-colors">📰 Blog</a></li>
             </ul>
           </div>
 
           {/* Contact & Newsletter */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contact & Newsletter</h3>
+          <div className="space-y-3">
+            <h3 className="text-base font-semibold">Contact & Newsletter</h3>
 
             {/* Contact Info */}
             <div className="space-y-2 text-sm">
@@ -68,15 +66,11 @@ const Footer: React.FC = () => {
                 <span className="text-primary">📍</span>
                 <span className="text-base-content/70">Paris, France</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-primary">🕒</span>
-                <span className="text-base-content/70">Lun-Ven: 8h-18h</span>
-              </div>
             </div>
 
             {/* Newsletter */}
             <div className="space-y-2">
-              <p className="text-sm text-base-content/70">Restez informé de nos offres</p>
+              <p className="text-sm text-base-content/70">Restez informé</p>
               <div className="flex gap-2">
                 <input
                   type="email"
@@ -100,8 +94,6 @@ const Footer: React.FC = () => {
             <div className="flex gap-6 text-sm">
               <a href="#" className="text-base-content/60 hover:text-primary transition-colors">Conditions générales</a>
               <a href="#" className="text-base-content/60 hover:text-primary transition-colors">Politique de confidentialité</a>
-              <a href="#" className="text-base-content/60 hover:text-primary transition-colors">RGPD</a>
-              <a href="#" className="text-base-content/60 hover:text-primary transition-colors">Cookies</a>
             </div>
           </div>
         </div>

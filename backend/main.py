@@ -36,6 +36,12 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 # Mount static files for uploaded images
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+# Mount frontend public photos for product images
+import os
+frontend_photos_path = os.path.join(os.path.dirname(__file__), "../frontend/public/photos")
+if os.path.exists(frontend_photos_path):
+    app.mount("/photos", StaticFiles(directory=frontend_photos_path), name="photos")
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,

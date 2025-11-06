@@ -11,10 +11,14 @@ interface CheckoutFormData {
   postalCode: string;
   deliveryDate: string;
   deliveryTime: string;
-  paymentMethod: 'card' | 'paypal' | 'bank';
+  paymentMethod: 'card' | 'paypal' | 'bank' | 'crypto';
   cardNumber: string;
   expiryDate: string;
   cvv: string;
+  paypalEmail: string;
+  bankAccount: string;
+  cryptoWallet: string;
+  cryptoCurrency: string;
   acceptTerms: boolean;
 }
 
@@ -34,6 +38,10 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     cardNumber: '',
     expiryDate: '',
     cvv: '',
+    paypalEmail: '',
+    bankAccount: '',
+    cryptoWallet: '',
+    cryptoCurrency: 'bitcoin',
     acceptTerms: false,
   });
   const [isProcessing, setIsProcessing] = useState(false);
@@ -69,7 +77,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const totalWithDelivery = state.totalPrice + deliveryFee;
 
   return (
-    <div className="modal modal-open">
+    <div className="modal modal-open z-50">
       <div className="modal-box max-w-5xl max-h-[95vh] overflow-y-auto">
         <button
           className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 hover-lift z-10"
@@ -348,8 +356,9 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       required
                     >
                       <option value="card">💳 Carte bancaire (recommandé)</option>
-                      <option value="paypal">🅿️ PayPal</option>
-                      <option value="bank">🏦 Virement bancaire</option>
+                        <option value="paypal">🅿️ PayPal</option>
+                        <option value="crypto">₿ Cryptomonnaie</option>
+                        <option value="bank">🏦 Virement bancaire</option>
                     </select>
                   </div>
 
@@ -431,20 +440,155 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   )}
 
                   {formData.paymentMethod === 'paypal' && (
-                    <div className="alert alert-info mt-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      <span>Vous serez redirigé vers PayPal pour finaliser le paiement.</span>
+                    <div className="space-y-4 mt-6">
+                      <div className="bg-base-100 p-4 rounded-lg border border-base-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-2xl">🅿️</span>
+                          <span className="font-semibold text-base-content">Paiement PayPal</span>
+                        </div>
+                        <p className="text-sm text-base-content/70 mb-4">
+                          Payez rapidement et en toute sécurité avec votre compte PayPal.
+                        </p>
+                        <div className="form-control">
+                          <label className="label">
+                            <span className="label-text font-semibold">Email PayPal *</span>
+                          </label>
+                          <input
+                            type="email"
+                            name="paypalEmail"
+                            value={formData.paypalEmail}
+                            onChange={handleInputChange}
+                            className="input input-bordered focus-visible"
+                            placeholder="votre@email.com"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Vous serez redirigé vers PayPal pour finaliser le paiement en toute sécurité.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.paymentMethod === 'crypto' && (
+                    <div className="space-y-4 mt-6">
+                      <div className="bg-base-100 p-4 rounded-lg border border-base-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-2xl">₿</span>
+                          <span className="font-semibold text-base-content">Paiement en Cryptomonnaie</span>
+                        </div>
+                        <p className="text-sm text-base-content/70 mb-4">
+                          Accepte Bitcoin, Ethereum, et autres cryptomonnaies majeures.
+                          Conversion automatique en temps réel.
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text font-semibold">Cryptomonnaie *</span>
+                            </label>
+                            <select
+                              name="cryptoCurrency"
+                              value={formData.cryptoCurrency}
+                              onChange={handleInputChange}
+                              className="select select-bordered focus-visible"
+                              required
+                            >
+                              <option value="bitcoin">₿ Bitcoin (BTC)</option>
+                              <option value="ethereum">Ξ Ethereum (ETH)</option>
+                              <option value="litecoin">Ł Litecoin (LTC)</option>
+                              <option value="usdt">💲 Tether (USDT)</option>
+                              <option value="bnb">🟡 Binance Coin (BNB)</option>
+                            </select>
+                          </div>
+
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text font-semibold">Votre wallet *</span>
+                            </label>
+                            <input
+                              type="text"
+                              name="cryptoWallet"
+                              value={formData.cryptoWallet}
+                              onChange={handleInputChange}
+                              className="input input-bordered focus-visible"
+                              placeholder="Adresse de votre wallet"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="bg-white p-3 rounded border">
+                          <div className="text-sm">
+                            <div className="font-medium text-orange-800 mb-1">Montant à envoyer:</div>
+                            <div className="text-lg font-bold text-orange-600">
+                              {formData.cryptoCurrency === 'bitcoin' && `₿ ${(totalWithDelivery / 45000).toFixed(6)}`}
+                              {formData.cryptoCurrency === 'ethereum' && `Ξ ${(totalWithDelivery / 2500).toFixed(4)}`}
+                              {formData.cryptoCurrency === 'litecoin' && `Ł ${(totalWithDelivery / 80).toFixed(4)}`}
+                              {formData.cryptoCurrency === 'usdt' && `₮ ${totalWithDelivery.toFixed(2)}`}
+                              {formData.cryptoCurrency === 'bnb' && `🟡 ${(totalWithDelivery / 300).toFixed(4)}`}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              Taux de conversion estimé • Mise à jour en temps réel
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>L'adresse de paiement vous sera fournie après validation de la commande. Le montant sera calculé au taux actuel.</span>
+                      </div>
                     </div>
                   )}
 
                   {formData.paymentMethod === 'bank' && (
-                    <div className="alert alert-warning mt-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      <span>Les coordonnées bancaires vous seront communiquées après validation de la commande.</span>
+                    <div className="space-y-4 mt-6">
+                      <div className="bg-base-100 p-4 rounded-lg border border-base-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-2xl">🏦</span>
+                          <span className="font-semibold text-base-content">Virement bancaire</span>
+                        </div>
+                        <p className="text-sm text-base-content/70 mb-4">
+                          Paiement par virement bancaire traditionnel.
+                        </p>
+                        <div className="bg-base-200 p-4 rounded border">
+                          <h4 className="font-semibold mb-3 text-base-content">Coordonnées bancaires</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="font-medium">Banque:</span>
+                              <span>Banque Populaire</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-medium">IBAN:</span>
+                              <span className="font-mono">FR76 1234 5678 9012 3456 7890 123</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-medium">BIC:</span>
+                              <span className="font-mono">BPFRFRPP</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-medium">Titulaire:</span>
+                              <span>WoodShot SARL</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-medium">Référence:</span>
+                              <span className="font-mono">CMD-{Date.now()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="alert alert-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <span>Veuillez effectuer le virement dans les 48h. La commande sera validée après réception du paiement.</span>
+                      </div>
                     </div>
                   )}
                 </div>

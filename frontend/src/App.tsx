@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
+import DeliveryAreas from './components/DeliveryAreas';
+import Testimonials from './components/Testimonials';
+import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import AdminLayout from './components/AdminLayout';
 import Contact from './components/Contact';
@@ -31,6 +34,9 @@ function MainLayout() {
                 <ProductGrid />
               </div>
             </section>
+            <DeliveryAreas />
+            <Testimonials />
+            <FAQ />
           </>
         } />
         <Route path="/contact" element={<Contact />} />
