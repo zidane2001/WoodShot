@@ -8,6 +8,9 @@ import uvicorn
 import os
 import shutil
 from pathlib import Path
+import httpx
+import uuid
+from typing import Dict, Any
 
 from database import get_db, engine
 from models import Base
@@ -45,13 +48,17 @@ if os.path.exists(frontend_photos_path):
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Frontend URLs
+    allow_origins=["http://localhost:5173", "http://localhost:5175", "http://localhost:3000"],  # Frontend URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 security = HTTPBearer()
+
+# NowPayments configuration
+NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY", "your_api_key_here")
+NOWPAYMENTS_BASE_URL = "https://api.nowpayments.io/v1"
 
 # Dependency to get current user
 async def get_current_user(
@@ -189,6 +196,99 @@ def get_delivery_status(tracking_number: str, db: Session = Depends(get_db)):
             "lng": 2.3522
         }
     }
+
+# Payment routes
+@app.post("/api/payments/create", response_model=PaymentResponse)
+async def create_payment(payment: PaymentRequest):
+    """
+    Create a payment request using NowPayments API
+    """
+    try:
+        # Check if API key is configured
+        if NOWPAYMENTS_API_KEY == "YOUR_ACTUAL_NOWPAYMENTS_API_KEY_HERE" or not NOWPAYMENTS_API_KEY:
+            # Fallback: redirect to the static payment URL provided by user
+            return PaymentResponse(
+                payment_id=f"fallback_{payment.order_id}",
+                payment_url="https://nowpayments.io/payment/?iid=6405381471",
+                amount=payment.amount,
+                currency=payment.currency,
+                crypto_currency=payment.crypto_currency,
+                status="pending"
+            )
+
+        # Map crypto currency names to NowPayments format
+        crypto_mapping = {
+            "bitcoin": "btc",
+            "btc": "btc",
+            "usdt": "usdttrc20",
+            "tether": "usdttrc20"
+        }
+
+        crypto_currency = crypto_mapping.get(payment.crypto_currency.lower(), "btc")
+
+        # Prepare payment data for NowPayments
+        payment_data = {
+            "price_amount": payment.amount,
+            "price_currency": payment.currency,
+            "pay_currency": crypto_currency,
+            "order_id": payment.order_id,
+            "order_description": payment.description,
+            "customer_email": payment.customer_email,
+            "customer_name": payment.customer_name,
+            "ipn_callback_url": f"{os.getenv('BASE_URL', 'http://localhost:8000')}/api/payments/callback",
+            "success_url": f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/success",
+            "cancel_url": f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/cancel"
+        }
+
+        # Make request to NowPayments API
+        headers = {
+            "x-api-key": NOWPAYMENTS_API_KEY,
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{NOWPAYMENTS_BASE_URL}/payment",
+                json=payment_data,
+                headers=headers,
+                timeout=30.0
+            )
+
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Erreur NowPayments: {response.text}"
+                )
+
+            payment_response = response.json()
+
+            return PaymentResponse(
+                payment_id=payment_response["payment_id"],
+                payment_url=payment_response["pay_address"],
+                amount=payment.amount,
+                currency=payment.currency,
+                crypto_currency=crypto_currency,
+                status="pending"
+            )
+
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Erreur de connexion: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur serveur: {str(e)}")
+
+@app.post("/api/payments/callback")
+async def payment_callback(callback_data: Dict[str, Any]):
+    """
+    Handle NowPayments IPN callback
+    """
+    # Verify the callback is from NowPayments (you should implement signature verification)
+    # For now, just log the callback
+    print(f"Payment callback received: {callback_data}")
+
+    # Update order status based on payment status
+    # This would update your database with payment confirmation
+
+    return {"status": "ok"}
 
 # Admin routes
 @app.put("/api/admin/products/{product_id}", response_model=ProductResponse)

@@ -117,6 +117,24 @@ class DeliveryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Payment schemas
+class PaymentRequest(BaseModel):
+    amount: float
+    currency: str = "EUR"
+    crypto_currency: str = "BTC"
+    order_id: str
+    customer_email: str
+    customer_name: str
+    description: str
+
+class PaymentResponse(BaseModel):
+    payment_id: str
+    payment_url: str
+    amount: float
+    currency: str
+    crypto_currency: str
+    status: str
+
 # Auth schemas
 class TokenResponse(BaseModel):
     access_token: str
