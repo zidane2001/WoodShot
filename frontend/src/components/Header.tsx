@@ -12,7 +12,7 @@ const Header: React.FC = () => {
   const [showTrackingModal, setShowTrackingModal] = useState(false);
 
   return (
-    <header className="navbar bg-base-100 shadow-lg sticky top-0 z-20">
+    <header className="navbar bg-base-100 shadow-lg sticky top-0 z-20 px-2">
       <div className="navbar-start">
         <div className="dropdown">
           <button onClick={() => setShowMobileMenu(true)} className="btn btn-ghost lg:hidden">
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
             <li><a href="#contact">Contact</a></li>
           </ul>
         </div>
-        <a className="btn btn-ghost text-xl font-bold">
+        <a className="btn btn-ghost text-lg sm:text-xl font-bold">
           <span className="text-primary">Wood</span>Shot
         </a>
       </div>
@@ -60,14 +60,12 @@ const Header: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button className="btn btn-outline" onClick={() => setShowTrackingModal(true)}>
-            📦 Suivi
-          </button>
-          <a href="/admin" className="btn btn-secondary">
-            🔧 Admin
-          </a>
-        </div>
+        <button className="btn btn-outline hidden sm:flex" onClick={() => setShowTrackingModal(true)}>
+          📦 Suivi
+        </button>
+        <button className="btn btn-outline sm:hidden" onClick={() => setShowTrackingModal(true)}>
+          📦
+        </button>
       </div>
 
       {showCheckout && <Checkout onClose={() => setShowCheckout(false)} />}

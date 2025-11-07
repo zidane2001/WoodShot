@@ -147,11 +147,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout
 
           {/* Enhanced Footer */}
           <div className="p-6 border-t border-base-300 bg-gradient-to-r from-base-200/50 to-base-100/50">
-            <a href="/admin" className="btn btn-secondary btn-block hover-lift mb-3">
-              <span className="mr-2">🔧</span>
-              Accès Admin
-            </a>
-
             {/* Quick contact info */}
             <div className="text-center text-xs text-base-content/60">
               <p className="mb-1">Besoin d'aide ?</p>
