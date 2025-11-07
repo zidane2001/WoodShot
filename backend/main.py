@@ -48,7 +48,7 @@ if os.path.exists(frontend_photos_path):
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:5173")],  # Frontend URLs
+    allow_origins=["http://localhost:5173", "https://woodshot-frontend.onrender.com/"],  # Frontend URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
