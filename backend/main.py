@@ -45,13 +45,15 @@ frontend_photos_path = os.path.join(os.path.dirname(__file__), "../frontend/publ
 if os.path.exists(frontend_photos_path):
     app.mount("/photos", StaticFiles(directory=frontend_photos_path), name="photos")
 
-# CORS middleware
+# CORS middleware - Ultra-permissive configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://woodshot-frontend.onrender.com/"],  # Frontend URLs
+    allow_origins=lambda origin: True,  # Allow all origins dynamically
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],  # Expose all headers to client
+    max_age=86400,  # Cache preflight for 24 hours
 )
 
 security = HTTPBearer()
