@@ -19,7 +19,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/dashboard', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

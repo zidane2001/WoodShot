@@ -29,7 +29,7 @@ const ProductManagement: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/products');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -52,7 +52,7 @@ const ProductManagement: React.FC = () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/products/${productId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -71,7 +71,7 @@ const ProductManagement: React.FC = () => {
 
   const handleUpdateStock = async (productId: number, newStock: number) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/inventory/${productId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/inventory/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -513,7 +513,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) 
     e.preventDefault();
 
     try {
-      const url = product ? `http://localhost:8000/api/admin/products/${product.id}` : 'http://localhost:8000/api/products';
+      const url = product ? `${import.meta.env.VITE_API_URL}/api/admin/products/${product.id}` : `${import.meta.env.VITE_API_URL}/api/products`;
       const method = product ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -633,7 +633,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) 
                   formDataUpload.append('file', file);
 
                   try {
-                    const response = await fetch('http://localhost:8000/api/admin/upload-image', {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/upload-image`, {
                       method: 'POST',
                       headers: {
                         'Authorization': `Bearer ${token}`,

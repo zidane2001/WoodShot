@@ -33,7 +33,7 @@ const ProductGrid: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/products');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         if (response.ok) {
           const data = await response.json();
           // Transform API response (snake_case) to frontend interface (camelCase)
