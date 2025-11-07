@@ -9,7 +9,6 @@ const Header: React.FC = () => {
   const { state } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
 
   return (
