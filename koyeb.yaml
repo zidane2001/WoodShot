@@ -1,0 +1,73 @@
+services:
+  - name: woodshot-db
+    source:
+      type: docker
+      image: postgres:15
+    environment:
+      - key: POSTGRES_USER
+        value: woodshot_user
+      - key: POSTGRES_PASSWORD
+        value: wood_001
+      - key: POSTGRES_DB
+        value: woodshot_db
+    ports:
+      - port: 5432
+        public: false
+    volumes:
+      - name: db-data
+        size: 10GB
+    healthchecks:
+      tcp:
+        port: 5432
+
+  - name: woodshot-backend
+    source:
+      type: git
+      repository: https://github.com/your-username/woodshot
+      branch: main
+      build_command: cd backend && pip install -r requirements.txt
+      run_command: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    environment:
+      - key: DATABASE_URL
+        value: postgresql://woodshot_user:wood_001@woodshot-db:5432/woodshot_db
+      - key: SECRET_KEY
+        value: wJalrXUtnFEMI_K7MDENGbPxRfiCYEXAMPLEKEY
+      - key: NOWPAYMENTS_API_KEY
+        value: uGqlVng6ng9v5kQ07Q/I02XeLRoyKShz
+      - key: BASE_URL
+        value: https://woodshot-backend.koyeb.app
+      - key: FRONTEND_URL
+        value: https://woodshot-frontend.koyeb.app
+    ports:
+      - port: 8000
+        public: true
+    healthchecks:
+      http:
+        path: /api/auth/me
+        port: 8000
+    dependencies:
+      - woodshot-db
+
+  - name: woodshot-frontend
+    source:
+      type: git
+      repository: https://github.com/zidane2001/WoodShot
+      branch: main
+      build_command: cd frontend && npm install && npm run build
+      run_command: cd frontend && npx serve -s dist -l $PORT
+    environment:
+      - key: VITE_API_URL
+        value: https://woodshot-backend.koyeb.app
+    ports:
+      - port: 3000
+        public: true
+    healthchecks:
+      http:
+        path: /
+        port: 3000
+    dependencies:
+      - woodshot-backend
+
+volumes:
+  - name: db-data
+    size: 10GB
