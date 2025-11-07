@@ -48,7 +48,7 @@ if os.path.exists(frontend_photos_path):
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5175", "http://localhost:3000"],  # Frontend URLs
+    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:5173")],  # Frontend URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,7 +57,7 @@ app.add_middleware(
 security = HTTPBearer()
 
 # NowPayments configuration
-NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY", "your_api_key_here")
+NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY")
 NOWPAYMENTS_BASE_URL = "https://api.nowpayments.io/v1"
 
 # Dependency to get current user
