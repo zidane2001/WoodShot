@@ -48,7 +48,7 @@ if os.path.exists(frontend_photos_path):
 # CORS middleware - Ultra-permissive configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=lambda origin: True,  # Allow all origins dynamically
+    allow_origins=["*"],  # Allow all origins with wildcard
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
