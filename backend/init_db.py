@@ -1,5 +1,5 @@
 from database import engine, Base
-from models import User, Product, Order, OrderItem, Address, Delivery, Inventory
+from models import Product, Inventory
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
@@ -14,26 +14,12 @@ def init_database():
 
 def seed_database():
     """Seed the database with initial data"""
-    from werkzeug.security import generate_password_hash
     from sqlalchemy.orm import Session
 
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
 
     try:
-        # Check if admin user exists
-        admin_user = db.query(User).filter_by(email='admin@woodshot.com').first()
-        if not admin_user:
-            admin = User(
-                email='admin@woodshot.com',
-                password_hash=generate_password_hash('admin123'),
-                first_name='Admin',
-                last_name='WoodShot',
-                is_admin=True
-            )
-            db.add(admin)
-            print("Admin user created: admin@woodshot.com / admin123")
-
         # Check if products exist
         if db.query(Product).count() == 0:
             products_data = [

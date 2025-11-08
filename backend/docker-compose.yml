@@ -17,20 +17,4 @@ services:
       - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - ./uploads:/app/uploads
-    depends_on:
-      - db
     command: python app.py
-
-  db:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=woodshot_db
-      - POSTGRES_USER=woodshot_user
-      - POSTGRES_PASSWORD=wood_001
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
