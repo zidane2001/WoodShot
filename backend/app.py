@@ -117,7 +117,7 @@ def get_products():
         'name': p.name,
         'description': p.description,
         'wood_type': p.wood_type,
-        'price_per_unit': str(p.price_per_unit),
+        'price_per_unit': float(p.price_per_unit),
         'unit': p.unit,
         'stock_quantity': p.stock_quantity,
         'image_url': p.image_url,
@@ -293,7 +293,7 @@ def get_orders():
 
     return jsonify([{
         'id': order.id,
-        'total_amount': str(order.total_amount),
+        'total_amount': float(order.total_amount),
         'status': order.status,
         'created_at': order.created_at.isoformat(),
         'user_id': order.user_id
@@ -347,7 +347,7 @@ def create_order():
         db.add(item)
 
     db.commit()
-    return jsonify({'id': order.id, 'message': 'Order created', 'total_amount': str(total_amount)}), 201
+    return jsonify({'id': order.id, 'message': 'Order created', 'total_amount': float(total_amount)}), 201
 
 @app.route('/api/orders/<int:id>', methods=['PUT'])
 @jwt_required()
@@ -476,7 +476,7 @@ def get_all_orders():
             'first_name': order.user.first_name,
             'last_name': order.user.last_name
         },
-        'total_amount': str(order.total_amount),
+        'total_amount': float(order.total_amount),
         'status': order.status,
         'created_at': order.created_at.isoformat()
     } for order in orders])
