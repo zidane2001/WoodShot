@@ -3,11 +3,12 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from sqlalchemy.orm import Session
 from database import get_db, engine, Base
-from models import Product, Inventory
+from models import Product, Inventory, User, Address, Order, OrderItem, Delivery
 import os
 from dotenv import load_dotenv
 import cloudinary
 import cloudinary.uploader
+from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 
@@ -42,6 +43,60 @@ def upload_to_cloudinary(file):
         return None
 
 # Routes
+
+# User Authentication Routes
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    db: Session = next(get_db())
+
+    # Check if user already exists
+    if db.query(User).filter_by(email=data['email']).first():
+        return jsonify({'message': 'User already exists'}), 400
+
+    # Create user
+    hashed_password = generate_password_hash(data['password'])
+    user = User(
+        email=data['email'],
+        password_hash=hashed_password,
+        first_name=data['first_name'],
+        last_name=data['last_name'],
+        phone=data.get('phone')
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    access_token = create_access_token(identity=user.id)
+    return jsonify({
+        'access_token': access_token,
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+    }), 201
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    db: Session = next(get_db())
+
+    user = db.query(User).filter_by(email=data['email']).first()
+    if not user or not check_password_hash(user.password_hash, data['password']):
+        return jsonify({'message': 'Invalid credentials'}), 401
+
+    access_token = create_access_token(identity=user.id)
+    return jsonify({
+        'access_token': access_token,
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+    })
 
 @app.route('/api/auth/admin', methods=['POST'])
 def admin_access():
@@ -143,6 +198,314 @@ def delete_product(id):
     db.delete(product)
     db.commit()
     return jsonify({'message': 'Product deleted'})
+
+# Address Management Routes
+@app.route('/api/addresses', methods=['GET'])
+@jwt_required()
+def get_addresses():
+    current_user = get_jwt_identity()
+    if current_user == 'admin':
+        return jsonify({'message': 'Admin cannot access user addresses'}), 403
+
+    db: Session = next(get_db())
+    addresses = db.query(Address).filter_by(user_id=current_user).all()
+    return jsonify([{
+        'id': addr.id,
+        'street': addr.street,
+        'city': addr.city,
+        'postal_code': addr.postal_code,
+        'country': addr.country,
+        'is_default': addr.is_default
+    } for addr in addresses])
+
+@app.route('/api/addresses', methods=['POST'])
+@jwt_required()
+def create_address():
+    current_user = get_jwt_identity()
+    if current_user == 'admin':
+        return jsonify({'message': 'Admin cannot create user addresses'}), 403
+
+    data = request.get_json()
+    db: Session = next(get_db())
+
+    address = Address(
+        user_id=current_user,
+        street=data['street'],
+        city=data['city'],
+        postal_code=data['postal_code'],
+        country=data.get('country', 'France'),
+        is_default=data.get('is_default', False)
+    )
+    db.add(address)
+    db.commit()
+    db.refresh(address)
+    return jsonify({'id': address.id, 'message': 'Address created'}), 201
+
+@app.route('/api/addresses/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_address(id):
+    current_user = get_jwt_identity()
+    if current_user == 'admin':
+        return jsonify({'message': 'Admin cannot update user addresses'}), 403
+
+    data = request.get_json()
+    db: Session = next(get_db())
+    address = db.query(Address).filter_by(id=id, user_id=current_user).first()
+    if not address:
+        return jsonify({'message': 'Address not found'}), 404
+
+    address.street = data.get('street', address.street)
+    address.city = data.get('city', address.city)
+    address.postal_code = data.get('postal_code', address.postal_code)
+    address.country = data.get('country', address.country)
+    address.is_default = data.get('is_default', address.is_default)
+
+    db.commit()
+    return jsonify({'message': 'Address updated'})
+
+@app.route('/api/addresses/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_address(id):
+    current_user = get_jwt_identity()
+    if current_user == 'admin':
+        return jsonify({'message': 'Admin cannot delete user addresses'}), 403
+
+    db: Session = next(get_db())
+    address = db.query(Address).filter_by(id=id, user_id=current_user).first()
+    if not address:
+        return jsonify({'message': 'Address not found'}), 404
+
+    db.delete(address)
+    db.commit()
+    return jsonify({'message': 'Address deleted'})
+
+# Order Management Routes
+@app.route('/api/orders', methods=['GET'])
+@jwt_required()
+def get_orders():
+    current_user = get_jwt_identity()
+    db: Session = next(get_db())
+
+    if current_user == 'admin':
+        orders = db.query(Order).all()
+    else:
+        orders = db.query(Order).filter_by(user_id=current_user).all()
+
+    return jsonify([{
+        'id': order.id,
+        'total_amount': str(order.total_amount),
+        'status': order.status,
+        'created_at': order.created_at.isoformat(),
+        'user_id': order.user_id
+    } for order in orders])
+
+@app.route('/api/orders', methods=['POST'])
+@jwt_required()
+def create_order():
+    current_user = get_jwt_identity()
+    if current_user == 'admin':
+        return jsonify({'message': 'Admin cannot create orders'}), 403
+
+    data = request.get_json()
+    db: Session = next(get_db())
+
+    # Calculate total amount and create order items
+    total_amount = 0
+    order_items = []
+
+    for item_data in data['items']:
+        product = db.query(Product).filter_by(id=item_data['product_id']).first()
+        if not product:
+            return jsonify({'message': f'Product {item_data["product_id"]} not found'}), 404
+
+        quantity = item_data['quantity']
+        unit_price = float(product.price_per_unit)
+        total_price = unit_price * quantity
+        total_amount += total_price
+
+        order_item = OrderItem(
+            product_id=product.id,
+            quantity=quantity,
+            unit_price=unit_price,
+            total_price=total_price
+        )
+        order_items.append(order_item)
+
+    # Create order
+    order = Order(
+        user_id=current_user,
+        total_amount=total_amount,
+        status='pending'
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+    # Add order items
+    for item in order_items:
+        item.order_id = order.id
+        db.add(item)
+
+    db.commit()
+    return jsonify({'id': order.id, 'message': 'Order created', 'total_amount': str(total_amount)}), 201
+
+@app.route('/api/orders/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_order_status(id):
+    current_user = get_jwt_identity()
+    data = request.get_json()
+    db: Session = next(get_db())
+
+    order = db.query(Order).filter_by(id=id).first()
+    if not order:
+        return jsonify({'message': 'Order not found'}), 404
+
+    # Only admin or order owner can update
+    if current_user != 'admin' and order.user_id != current_user:
+        return jsonify({'message': 'Access denied'}), 403
+
+    order.status = data.get('status', order.status)
+    db.commit()
+    return jsonify({'message': 'Order updated'})
+
+# Delivery Management Routes
+@app.route('/api/deliveries', methods=['GET'])
+@jwt_required()
+def get_deliveries():
+    current_user = get_jwt_identity()
+    db: Session = next(get_db())
+
+    if current_user == 'admin':
+        deliveries = db.query(Delivery).all()
+    else:
+        deliveries = db.query(Delivery).join(Order).filter(Order.user_id == current_user).all()
+
+    return jsonify([{
+        'id': delivery.id,
+        'order_id': delivery.order_id,
+        'address': {
+            'street': delivery.address.street,
+            'city': delivery.address.city,
+            'postal_code': delivery.address.postal_code,
+            'country': delivery.address.country
+        },
+        'delivery_date': delivery.delivery_date.isoformat() if delivery.delivery_date else None,
+        'status': delivery.status,
+        'tracking_number': delivery.tracking_number,
+        'notes': delivery.notes
+    } for delivery in deliveries])
+
+@app.route('/api/deliveries', methods=['POST'])
+@jwt_required()
+def create_delivery():
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    data = request.get_json()
+    db: Session = next(get_db())
+
+    delivery = Delivery(
+        order_id=data['order_id'],
+        address_id=data['address_id'],
+        delivery_date=data.get('delivery_date'),
+        status=data.get('status', 'pending'),
+        tracking_number=data.get('tracking_number'),
+        notes=data.get('notes')
+    )
+    db.add(delivery)
+    db.commit()
+    db.refresh(delivery)
+    return jsonify({'id': delivery.id, 'message': 'Delivery created'}), 201
+
+@app.route('/api/deliveries/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_delivery(id):
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    data = request.get_json()
+    db: Session = next(get_db())
+    delivery = db.query(Delivery).filter_by(id=id).first()
+    if not delivery:
+        return jsonify({'message': 'Delivery not found'}), 404
+
+    delivery.delivery_date = data.get('delivery_date', delivery.delivery_date)
+    delivery.status = data.get('status', delivery.status)
+    delivery.tracking_number = data.get('tracking_number', delivery.tracking_number)
+    delivery.notes = data.get('notes', delivery.notes)
+
+    db.commit()
+    return jsonify({'message': 'Delivery updated'})
+
+# Admin Routes for Users, Orders, Deliveries
+@app.route('/api/admin/users', methods=['GET'])
+@jwt_required()
+def get_all_users():
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    db: Session = next(get_db())
+    users = db.query(User).all()
+    return jsonify([{
+        'id': user.id,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'phone': user.phone,
+        'is_active': user.is_active,
+        'created_at': user.created_at.isoformat()
+    } for user in users])
+
+@app.route('/api/admin/orders', methods=['GET'])
+@jwt_required()
+def get_all_orders():
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    db: Session = next(get_db())
+    orders = db.query(Order).all()
+    return jsonify([{
+        'id': order.id,
+        'user': {
+            'id': order.user.id,
+            'email': order.user.email,
+            'first_name': order.user.first_name,
+            'last_name': order.user.last_name
+        },
+        'total_amount': str(order.total_amount),
+        'status': order.status,
+        'created_at': order.created_at.isoformat()
+    } for order in orders])
+
+@app.route('/api/admin/deliveries', methods=['GET'])
+@jwt_required()
+def get_all_deliveries():
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    db: Session = next(get_db())
+    deliveries = db.query(Delivery).all()
+    return jsonify([{
+        'id': delivery.id,
+        'order_id': delivery.order_id,
+        'user': {
+            'id': delivery.order.user.id,
+            'email': delivery.order.user.email
+        },
+        'address': {
+            'street': delivery.address.street,
+            'city': delivery.address.city,
+            'postal_code': delivery.address.postal_code
+        },
+        'delivery_date': delivery.delivery_date.isoformat() if delivery.delivery_date else None,
+        'status': delivery.status,
+        'tracking_number': delivery.tracking_number
+    } for delivery in deliveries])
 
 
 if __name__ == '__main__':
