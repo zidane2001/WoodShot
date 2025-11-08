@@ -31,16 +31,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   // Images alternatives locales
   const getAdditionalImages = (woodType: string): string[] => {
     const imageSets: { [key: string]: string[] } = {
-      oak: ['/photos/boisChauffageChene.png', '/photos/image copy 2.png', '/photos/image copy 5.png'],
-      beech: ['/photos/boisChauffageHetre.png', '/photos/image copy 3.png', '/photos/image copy 6.png'],
-      birch: ['/photos/boisChauffageBouleau.png', '/photos/image copy 7.png', '/photos/image.png'],
-      pine: ['/photos/placeholder-wood.jpg', '/photos/imagefond.png', '/photos/image copy.png'],
-      maple: ['/photos/placeholder-wood.jpg', '/photos/image copy 2.png', '/photos/image copy 3.png'],
-      ash: ['/photos/placeholder-wood.jpg', '/photos/image copy 5.png', '/photos/image copy 6.png'],
-      mixed: ['/photos/image copy 2.png', '/photos/image copy 7.png', '/photos/imagefond.png']
+      oak: ['/photos/boisChauffageChêne.png', '/photos/boisChauffageBou.png', '/photos/boisChauffageBouleau.png'],
+      beech: ['/photos/boisChauffageBou.png', '/photos/boisChauffageChêne.png', '/photos/boisChauffageBouleau.png'],
+      birch: ['/photos/boisChauffageBouleau.png', '/photos/boisChauffageChêne.png', '/photos/boisChauffageBou.png'],
+      pine: ['/photos/boisChauffageChêne.png', '/photos/boisChauffageBou.png', '/photos/boisChauffageBouleau.png'],
+      maple: ['/photos/boisChauffageBouleau.png', '/photos/boisChauffageChêne.png', '/photos/boisChauffageBou.png'],
+      ash: ['/photos/boisChauffageChêne.png', '/photos/boisChauffageBou.png', '/photos/boisChauffageBouleau.png'],
+      mixed: ['/photos/boisChauffageChêne.png', '/photos/boisChauffageBou.png', '/photos/boisChauffageBouleau.png']
     };
 
-    return imageSets[woodType] || ['/photos/placeholder-wood.jpg', '/photos/image copy 2.png', '/photos/image copy 3.png'];
+    return imageSets[woodType] || ['/photos/boisChauffageChêne.png', '/photos/boisChauffageBou.png', '/photos/boisChauffageBouleau.png'];
   };
 
   const additionalImages = getAdditionalImages(product.woodType);
@@ -75,15 +75,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 const fallbacks: { [key: string]: string } = {
-                  oak: '/photos/boisChauffageChene.png',
-                  beech: '/photos/boisChauffageHetre.png',
+                  oak: '/photos/boisChauffageChêne.png',
+                  beech: '/photos/boisChauffageBou.png',
                   birch: '/photos/boisChauffageBouleau.png',
-                  pine: '/photos/boisChauffagePin.png',
-                  maple: '/photos/boisChauffageErable.png',
-                  ash: '/photos/boisChauffageFrene.png',
-                  mixed: '/photos/melangeBois.png'
+                  pine: '/photos/boisChauffageChêne.png',
+                  maple: '/photos/boisChauffageBouleau.png',
+                  ash: '/photos/boisChauffageChêne.png',
+                  mixed: '/photos/boisChauffageChêne.png'
                 };
-                target.src = fallbacks[product.woodType] || '/photos/placeholder.png';
+                target.src = fallbacks[product.woodType] || '/photos/boisChauffageChêne.png';
               }}
             />
           </div>

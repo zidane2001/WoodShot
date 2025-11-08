@@ -1,0 +1,17 @@
+# Uploaded Hero Images for Woodshot Database
+
+Title: Hero Image 1
+Description: WoodShot hero background image 1
+URL: https://res.cloudinary.com/djxiszqgd/image/upload/v1762625850/woodshot/hero/image%20copy%202.png
+Order: 0
+
+Title: Hero Image 2
+Description: WoodShot hero background image 2
+URL: https://res.cloudinary.com/djxiszqgd/image/upload/v1762625855/woodshot/hero/image%20copy.png
+Order: 1
+
+Title: Hero Image 3
+Description: WoodShot hero background image 3
+URL: https://res.cloudinary.com/djxiszqgd/image/upload/v1762625864/woodshot/hero/image.png
+Order: 2
+

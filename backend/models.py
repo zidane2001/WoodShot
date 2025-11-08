@@ -110,3 +110,15 @@ class Delivery(Base):
     # Relationships
     order = relationship("Order", back_populates="delivery")
     address = relationship("Address", back_populates="deliveries")
+
+class HeroImage(Base):
+    __tablename__ = "hero_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    image_url = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    display_order = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

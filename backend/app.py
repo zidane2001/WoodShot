@@ -1,9 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from sqlalchemy.orm import Session
 from database import get_db, engine, Base
-from models import Product, Inventory, User, Address, Order, OrderItem, Delivery
+from models import Product, Inventory, User, Address, Order, OrderItem, Delivery, HeroImage
 import os
 from dotenv import load_dotenv
 import cloudinary
@@ -13,7 +13,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000"],
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
 jwt = JWTManager(app)
@@ -35,9 +38,9 @@ ADMIN_PIN = os.getenv('ADMIN_PIN', '2017')
 def verify_admin_pin(pin):
     return pin == ADMIN_PIN
 
-def upload_to_cloudinary(file):
+def upload_to_cloudinary(file, folder="woodshot/products"):
     try:
-        upload_result = cloudinary.uploader.upload(file, folder="woodshot/products")
+        upload_result = cloudinary.uploader.upload(file, folder=folder)
         return upload_result['secure_url']
     except Exception as e:
         return None
@@ -507,6 +510,96 @@ def get_all_deliveries():
         'tracking_number': delivery.tracking_number
     } for delivery in deliveries])
 
+# Hero Images Routes
+@app.route('/api/hero-images', methods=['GET'])
+def get_hero_images():
+    db: Session = next(get_db())
+    hero_images = db.query(HeroImage).filter_by(is_active=True).order_by(HeroImage.display_order).all()
+    return jsonify([{
+        'id': img.id,
+        'title': img.title,
+        'description': img.description,
+        'image_url': img.image_url,
+        'display_order': img.display_order
+    } for img in hero_images])
+
+@app.route('/api/hero-images', methods=['POST'])
+@jwt_required()
+def create_hero_image():
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    data = request.form
+    file = request.files.get('image')
+
+    image_url = None
+    if file:
+        image_url = upload_to_cloudinary(file, folder="woodshot/hero")
+
+    db: Session = next(get_db())
+    hero_image = HeroImage(
+        title=data['title'],
+        description=data.get('description'),
+        image_url=image_url,
+        display_order=data.get('display_order', 0)
+    )
+    db.add(hero_image)
+    db.commit()
+    db.refresh(hero_image)
+    return jsonify({'id': hero_image.id, 'message': 'Hero image created'}), 201
+
+@app.route('/api/hero-images/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_hero_image(id):
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    data = request.form
+    file = request.files.get('image')
+
+    db: Session = next(get_db())
+    hero_image = db.query(HeroImage).filter_by(id=id).first()
+    if not hero_image:
+        return jsonify({'message': 'Hero image not found'}), 404
+
+    if file:
+        hero_image.image_url = upload_to_cloudinary(file, folder="woodshot/hero")
+
+    hero_image.title = data.get('title', hero_image.title)
+    hero_image.description = data.get('description', hero_image.description)
+    hero_image.display_order = data.get('display_order', hero_image.display_order)
+    hero_image.is_active = data.get('is_active', hero_image.is_active)
+
+    db.commit()
+    return jsonify({'message': 'Hero image updated'})
+
+@app.route('/api/hero-images/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_hero_image(id):
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    db: Session = next(get_db())
+    hero_image = db.query(HeroImage).filter_by(id=id).first()
+    if not hero_image:
+        return jsonify({'message': 'Hero image not found'}), 404
+
+    db.delete(hero_image)
+    db.commit()
+    return jsonify({'message': 'Hero image deleted'})
+
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Max-Age', '86400')
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)

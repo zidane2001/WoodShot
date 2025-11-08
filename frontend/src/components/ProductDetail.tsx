@@ -46,7 +46,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }) => {
       'pine': '/photos/boisChauffageChêne.png',
       'maple': '/photos/boisChauffageBouleau.png',
       'ash': '/photos/boisChauffageChêne.png',
-      'mixed': '/photos/image copy 2.png'
+      'mixed': '/photos/boisChauffageChêne.png'
     };
     return fallbacks[woodType] || '/photos/boisChauffageChêne.png';
   }

@@ -7,7 +7,7 @@ const Testimonials: React.FC = () => {
       location: "Toronto",
       rating: 5,
       text: "Excellent service! Le bois est arrivé parfaitement sec et la livraison était ponctuelle. Je recommande vivement WoodShot.",
-      avatar: "/photos/photospersonnes/image copy 2.png"
+      avatar: "/photos/photospersonnes/image.png"
     },
     {
       name: "Pierre Martin",
@@ -21,7 +21,7 @@ const Testimonials: React.FC = () => {
       location: "Montreal",
       rating: 5,
       text: "Depuis 3 ans, je fais confiance à WoodShot pour mon bois de chauffage. Toujours satisfait de la qualité et du prix.",
-      avatar: "/photos/photospersonnes/image.png"
+      avatar: "/photos/photospersonnes/image copy 2.png"
     }
   ];
 
