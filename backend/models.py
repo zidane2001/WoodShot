@@ -7,19 +7,18 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     phone = Column(String)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     is_active = Column(Boolean, default=True)
-    is_admin = Column(Boolean, default=False)  # Added for admin role
+    is_admin = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    orders = relationship("Order", back_populates="user")
     addresses = relationship("Address", back_populates="user")
+    orders = relationship("Order", back_populates="user")
 
 class Address(Base):
     __tablename__ = "addresses"
@@ -37,6 +36,25 @@ class Address(Base):
     # Relationships
     user = relationship("User", back_populates="addresses")
     orders = relationship("Order", back_populates="address")
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    address_id = Column(Integer, ForeignKey("addresses.id"))
+    status = Column(String, default="pending")  # pending, confirmed, preparing, shipped, delivered, cancelled
+    total_amount = Column(DECIMAL(10, 2), nullable=False)
+    order_date = Column(DateTime(timezone=True), server_default=func.now())
+    delivery_date = Column(DateTime(timezone=True))
+    payment_status = Column(String, default="pending")
+    tracking_number = Column(String, unique=True)
+
+    # Relationships
+    user = relationship("User", back_populates="orders")
+    address = relationship("Address", back_populates="orders")
+    order_items = relationship("OrderItem", back_populates="order")
+    delivery = relationship("Delivery", back_populates="order", uselist=False)
 
 class Product(Base):
     __tablename__ = "products"
@@ -69,24 +87,6 @@ class Inventory(Base):
     # Relationships
     product = relationship("Product", back_populates="inventory")
 
-class Order(Base):
-    __tablename__ = "orders"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    address_id = Column(Integer, ForeignKey("addresses.id"))
-    status = Column(String, default="pending")  # pending, confirmed, preparing, shipped, delivered, cancelled
-    total_amount = Column(DECIMAL(10, 2), nullable=False)
-    order_date = Column(DateTime(timezone=True), server_default=func.now())
-    delivery_date = Column(DateTime(timezone=True))
-    payment_status = Column(String, default="pending")
-    tracking_number = Column(String, unique=True)
-
-    # Relationships
-    user = relationship("User", back_populates="orders")
-    address = relationship("Address", back_populates="orders")
-    order_items = relationship("OrderItem", back_populates="order")
-    delivery = relationship("Delivery", back_populates="order", uselist=False)
 
 class OrderItem(Base):
     __tablename__ = "order_items"

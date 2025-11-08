@@ -13,7 +13,10 @@ engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,  # Verify connections before use
     pool_recycle=300,    # Recycle connections after 5 minutes
-    echo=False           # Set to True for SQL query logging in development
+    echo=False,          # Set to True for SQL query logging in development
+    connect_args={
+        "sslmode": "require"  # Neon requires SSL
+    }
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
