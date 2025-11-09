@@ -606,28 +606,23 @@ def create_payment():
         data = request.get_json()
         print(f"Payment request received: {data}")
 
-        # For now, return a mock payment URL since NowPayments API key seems invalid
-        # TODO: Replace with actual NowPayments integration once API key is valid
-        payment_url = f"https://nowpayments.io/payment/{data.get('order_id', 'test')}"
-
-        return jsonify({
-            'payment_url': payment_url,
-            'payment_id': f"payment_{data.get('order_id', 'test')}",
-            'order_id': data.get('order_id'),
-            'status': 'pending'
-        }), 200
-
-        # Uncomment below when NowPayments API key is properly configured
-        """
         nowpayments_api_key = os.getenv('NOWPAYMENTS_API_KEY')
         if not nowpayments_api_key:
             return jsonify({'error': 'Payment service not configured'}), 500
+
+        # Map crypto currencies to NowPayments format
+        crypto_mapping = {
+            'bitcoin': 'btc',
+            'usdt': 'usdttrc20'
+        }
+
+        pay_currency = crypto_mapping.get(data.get('crypto_currency', 'bitcoin'), 'btc')
 
         # Create payment request for NowPayments
         payment_data = {
             'price_amount': data.get('amount'),
             'price_currency': data.get('currency', 'EUR'),
-            'pay_currency': data.get('crypto_currency', 'btc'),
+            'pay_currency': pay_currency,
             'order_id': data.get('order_id'),
             'order_description': data.get('description', 'WoodShot Order'),
             'ipn_callback_url': f"{os.getenv('BASE_URL', 'http://localhost:8000')}/api/payments/callback",
@@ -640,11 +635,16 @@ def create_payment():
             'Content-Type': 'application/json'
         }
 
+        print(f"Sending to NowPayments: {payment_data}")
+
         response = requests.post(
             'https://api.nowpayments.io/v1/payment',
             json=payment_data,
             headers=headers
         )
+
+        print(f"NowPayments response status: {response.status_code}")
+        print(f"NowPayments response: {response.text}")
 
         if response.status_code == 200:
             payment_response = response.json()
@@ -657,7 +657,6 @@ def create_payment():
         else:
             print(f"NowPayments error: {response.status_code} - {response.text}")
             return jsonify({'error': 'Payment creation failed', 'detail': response.text}), 500
-        """
 
     except Exception as e:
         print(f"Payment error: {e}")
