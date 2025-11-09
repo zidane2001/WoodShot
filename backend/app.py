@@ -13,10 +13,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000", "https://woodshot-frontend.onrender.com"],
+
+# Comprehensive CORS configuration for all environments
+CORS(app,
+     origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000",
+              "https://woodshot-frontend.onrender.com", "https://woodshot.onrender.com",
+              "http://127.0.0.1:3000", "http://127.0.0.1:5173", "http://127.0.0.1:8000"],
      supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token",
+                    "Accept", "Accept-Version", "Content-Length", "Content-MD5"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+     max_age=86400)
 
 app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
 jwt = JWTManager(app)
@@ -591,13 +598,46 @@ def delete_hero_image(id):
     db.commit()
     return jsonify({'message': 'Hero image deleted'})
 
+# Payment Routes
+@app.route('/api/payments/create', methods=['POST'])
+def create_payment():
+    try:
+        data = request.get_json()
+        print(f"Payment request received: {data}")
+
+        # For now, return a mock payment URL
+        # In production, integrate with NowPayments or similar
+        payment_url = f"https://nowpayments.io/payment/{data.get('order_id', 'test')}"
+
+        return jsonify({
+            'payment_url': payment_url,
+            'order_id': data.get('order_id'),
+            'status': 'pending'
+        }), 200
+
+    except Exception as e:
+        print(f"Payment error: {e}")
+        return jsonify({'error': 'Payment creation failed', 'detail': str(e)}), 500
+
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin', '*'))
+    # Comprehensive CORS headers for all environments and endpoints
+    origin = request.headers.get('Origin')
+    allowed_origins = [
+        "http://localhost:3000", "http://localhost:5173", "http://localhost:8000",
+        "https://woodshot-frontend.onrender.com", "https://woodshot.onrender.com",
+        "http://127.0.0.1:3000", "http://127.0.0.1:5173", "http://127.0.0.1:8000"
+    ]
+
+    if origin in allowed_origins or not origin:
+        response.headers.add('Access-Control-Allow-Origin', origin or '*')
+    else:
+        response.headers.add('Access-Control-Allow-Origin', '*')
+
     response.headers.add('Access-Control-Allow-Credentials', 'true')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,X-CSRF-Token,Accept,Accept-Version,Content-Length,Content-MD5')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
     response.headers.add('Access-Control-Max-Age', '86400')
     return response
 
