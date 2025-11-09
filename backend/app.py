@@ -13,7 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000"],
+CORS(app, origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000", "https://woodshot-frontend.onrender.com"],
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
