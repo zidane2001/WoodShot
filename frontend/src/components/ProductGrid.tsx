@@ -33,16 +33,21 @@ const ProductGrid: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
+        console.log('Fetching products from:', `${import.meta.env.VITE_API_URL}/api/products`);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
-          signal: controller.signal,
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
         });
-        clearTimeout(timeoutId);
+
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
 
         if (response.ok) {
           const data = await response.json();
+          console.log('Received data:', data);
           // Transform API response (snake_case) to frontend interface (camelCase)
           const transformedData = data.map((product: any) => ({
             id: product.id.toString(),
@@ -62,15 +67,19 @@ const ProductGrid: React.FC = () => {
               burningTips: []
             }
           }));
+          console.log('Transformed data:', transformedData);
           setProducts(transformedData);
         } else {
-          console.error('Failed to fetch products');
+          console.error('Failed to fetch products:', response.status, response.statusText);
+          // Show error state instead of infinite loading
+          setProducts([]);
         }
       } catch (error) {
         console.error('Error fetching products:', error);
         // Show error state instead of infinite loading
         setProducts([]);
       } finally {
+        console.log('Setting loading to false');
         setLoading(false);
       }
     };
