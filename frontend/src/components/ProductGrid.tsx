@@ -33,7 +33,14 @@ const ProductGrid: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
         if (response.ok) {
           const data = await response.json();
           // Transform API response (snake_case) to frontend interface (camelCase)
@@ -61,6 +68,8 @@ const ProductGrid: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching products:', error);
+        // Show error state instead of infinite loading
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -116,6 +125,7 @@ const ProductGrid: React.FC = () => {
     return (
       <div className="flex justify-center items-center min-h-96">
         <div className="loading loading-spinner loading-lg text-primary"></div>
+        <p className="mt-4 text-base-content/70">Chargement des produits...</p>
       </div>
     );
   }

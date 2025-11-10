@@ -26,6 +26,16 @@ CORS(app,
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
      max_age=86400)
 
+# Additional CORS headers for development
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,X-CSRF-Token,Accept,Accept-Version,Content-Length,Content-MD5')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
+    response.headers.add('Access-Control-Max-Age', '86400')
+    return response
+
 app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
 jwt = JWTManager(app)
 
@@ -747,23 +757,7 @@ def payment_callback():
         return jsonify({'error': 'Callback processing failed'}), 500
 
 
-@app.after_request
-def after_request(response):
-    # Comprehensive CORS headers for all environments and endpoints
-    origin = request.headers.get('Origin')
-    allowed_origins = [
-        "http://localhost:3000", "http://localhost:5173", "http://localhost:8000",
-        "https://woodshot-frontend.onrender.com", "https://woodshot.onrender.com",
-        "http://127.0.0.1:3000", "http://127.0.0.1:5173", "http://127.0.0.1:8000"
-    ]
-
-    # Allow all origins for now to fix the issue
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,X-CSRF-Token,Accept,Accept-Version,Content-Length,Content-MD5')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
-    response.headers.add('Access-Control-Max-Age', '86400')
-    return response
+# Remove the duplicate after_request function since we added it above
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)
