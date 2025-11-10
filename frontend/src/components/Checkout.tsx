@@ -113,7 +113,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       console.log('Delivery fee:', deliveryFee);
 
       // Call backend payment API
-      const response = await fetch('http://localhost:8000/api/payments/create', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
