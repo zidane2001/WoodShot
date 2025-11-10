@@ -618,14 +618,19 @@ def create_payment():
 
         pay_currency = crypto_mapping.get(data.get('crypto_currency', 'bitcoin'), 'btc')
 
+        # Validate minimum payment amount (NowPayments minimum is usually around 1-5 USD equivalent)
+        amount_eur = float(data.get('amount', 0))
+        if amount_eur < 1:  # Minimum 1 EUR
+            return jsonify({'error': 'Payment amount too low', 'detail': 'Minimum payment is 1 EUR'}), 400
+
         # Create payment request for NowPayments
         payment_data = {
-            'price_amount': data.get('amount'),
-            'price_currency': data.get('currency', 'EUR'),
+            'price_amount': float(data.get('amount', 0)),
+            'price_currency': data.get('currency', 'EUR').upper(),
             'pay_currency': pay_currency,
             'order_id': data.get('order_id'),
             'order_description': data.get('description', 'WoodShot Order'),
-            'ipn_callback_url': f"{os.getenv('BASE_URL', 'https://woodshot-backend-um0v.onrender.com')}/api/payments/callback",
+            'ipn_callback_url': f"{os.getenv('BASE_URL', 'https://woodshot-backend-um0v.onrender.com').rstrip('/')}/api/payments/callback",
             'success_url': f"{os.getenv('FRONTEND_URL', 'https://woodshot-frontend.onrender.com')}/payment/success",
             'cancel_url': f"{os.getenv('FRONTEND_URL', 'https://woodshot-frontend.onrender.com')}/payment/cancel"
         }
@@ -637,8 +642,9 @@ def create_payment():
 
         print(f"Sending to NowPayments: {payment_data}")
 
+        # Use the correct NowPayments API endpoint
         response = requests.post(
-            'https://api.nowpayments.io/v1/payment',
+            'https://api.nowpayments.io/v1/invoice',
             json=payment_data,
             headers=headers
         )
@@ -646,30 +652,44 @@ def create_payment():
         print(f"NowPayments response status: {response.status_code}")
         print(f"NowPayments response: {response.text}")
 
-        if response.status_code == 200:
+        if response.status_code in [200, 201]:
             payment_response = response.json()
             print(f"Payment created successfully: {payment_response}")
 
-            # Check if payment is already completed (rare but possible)
-            if payment_response.get('payment_status') == 'finished':
-                return jsonify({
-                    'payment_url': payment_response.get('invoice_url'),
-                    'payment_id': payment_response.get('payment_id'),
-                    'order_id': data.get('order_id'),
-                    'status': 'completed',
-                    'message': 'Payment already completed'
-                }), 200
-            else:
-                return jsonify({
-                    'payment_url': payment_response.get('invoice_url'),
-                    'payment_id': payment_response.get('payment_id'),
-                    'order_id': data.get('order_id'),
-                    'status': 'pending'
-                }), 200
+            # NowPayments invoice API returns different structure
+            invoice_url = payment_response.get('invoice_url')
+            if not invoice_url:
+                # Try alternative fields
+                invoice_url = payment_response.get('url') or payment_response.get('payment_url')
+
+            if not invoice_url:
+                print(f"No invoice URL found in response: {payment_response}")
+                return jsonify({'error': 'Payment URL not generated', 'detail': 'Unable to create payment invoice'}), 500
+
+            return jsonify({
+                'payment_url': invoice_url,
+                'payment_id': payment_response.get('id') or payment_response.get('payment_id'),
+                'order_id': data.get('order_id'),
+                'status': 'pending'
+            }), 200
         else:
             print(f"NowPayments error: {response.status_code} - {response.text}")
-            # Don't return the raw error to frontend, just a generic message
-            return jsonify({'error': 'Payment service temporarily unavailable', 'detail': 'Please try again later'}), 500
+            # Try to parse error response
+            try:
+                error_response = response.json()
+                error_code = error_response.get('code', 'UNKNOWN_ERROR')
+                print(f"NowPayments error code: {error_code}")
+
+                # Handle specific error codes
+                if error_code == 'INVALID_API_KEY':
+                    return jsonify({'error': 'Payment service configuration error', 'detail': 'Please contact support'}), 500
+                elif error_code == 'INSUFFICIENT_FUNDS':
+                    return jsonify({'error': 'Payment amount too low', 'detail': 'Minimum payment amount required'}), 400
+                else:
+                    return jsonify({'error': 'Payment service temporarily unavailable', 'detail': 'Please try again later'}), 500
+            except:
+                # If we can't parse the error response, return generic error
+                return jsonify({'error': 'Payment service temporarily unavailable', 'detail': 'Please try again later'}), 500
 
     except Exception as e:
         print(f"Payment error: {e}")
