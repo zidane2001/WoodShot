@@ -3,13 +3,19 @@ import { useAuth } from '../contexts/AuthContext';
 import AdminDashboard from './AdminDashboard';
 import ProductManagement from './ProductManagement';
 import OrderManagement from './OrderManagement';
-import UserManagement from './UserManagement';
+import UserManagement from './UserManagement.tsx';
+import AdminLogin from './AdminLogin.tsx';
 
 type AdminTab = 'dashboard' | 'products' | 'orders' | 'users';
 
 const AdminLayout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
+
+  // If not authenticated as admin, show login
+  if (!token || user?.id !== 'admin') {
+    return <AdminLogin />;
+  }
 
   const tabs = [
     { id: 'dashboard' as AdminTab, label: 'Tableau de Bord', icon: '🏢' },

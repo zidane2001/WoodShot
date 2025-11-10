@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 interface User {
-  id: number;
+  id: number | string;
   email: string;
   first_name: string;
   last_name: string;
@@ -22,6 +22,7 @@ interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   register: (userData: RegisterData) => Promise<boolean>;
+  adminLogin: (pin: string) => Promise<boolean>;
 }
 
 interface RegisterData {
@@ -126,6 +127,50 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const adminLogin = async (pin: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/admin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pin }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.access_token;
+
+        // Create admin user object
+        const adminUser = {
+          id: 'admin',
+          email: 'admin@woodshot.fr',
+          first_name: 'Admin',
+          last_name: 'WoodShot',
+          is_active: true,
+          is_admin: true,
+        };
+
+        setAuthState({
+          user: adminUser,
+          token,
+          isAuthenticated: true,
+          isAdmin: true,
+        });
+
+        // Store in localStorage
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('auth_user', JSON.stringify(adminUser));
+
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Admin login error:', error);
+      return false;
+    }
+  };
+
   const logout = () => {
     setAuthState({
       user: null,
@@ -143,6 +188,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     login,
     logout,
     register,
+    adminLogin,
   };
 
   return (

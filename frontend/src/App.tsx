@@ -57,6 +57,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <Routes>
+            <Route path="/admin" element={<AdminLayout />} />
             <Route path="/admin/*" element={<AdminLayout />} />
             <Route path="/*" element={<MainLayout />} />
           </Routes>
