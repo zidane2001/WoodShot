@@ -643,11 +643,16 @@ def create_payment():
         print(f"Sending to NowPayments: {payment_data}")
 
         # Use the correct NowPayments API endpoint
-        response = requests.post(
-            'https://api.nowpayments.io/v1/invoice',
-            json=payment_data,
-            headers=headers
-        )
+        try:
+            response = requests.post(
+                'https://api.nowpayments.io/v1/invoice',
+                json=payment_data,
+                headers=headers,
+                timeout=30  # Add timeout
+            )
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {e}")
+            return jsonify({'error': 'Payment service temporarily unavailable', 'detail': 'Network error'}), 500
 
         print(f"NowPayments response status: {response.status_code}")
         print(f"NowPayments response: {response.text}")
@@ -730,11 +735,8 @@ def after_request(response):
         "http://127.0.0.1:3000", "http://127.0.0.1:5173", "http://127.0.0.1:8000"
     ]
 
-    if origin in allowed_origins or not origin:
-        response.headers.add('Access-Control-Allow-Origin', origin or '*')
-    else:
-        response.headers.add('Access-Control-Allow-Origin', '*')
-
+    # Allow all origins for now to fix the issue
+    response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,X-CSRF-Token,Accept,Accept-Version,Content-Length,Content-MD5')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
