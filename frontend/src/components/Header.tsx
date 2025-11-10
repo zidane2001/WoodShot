@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ThemeSelector from './ThemeSelector';
 import { useCart } from '../contexts/CartContext';
 import Checkout from './Checkout';
@@ -7,6 +8,7 @@ import TrackingModal from './TrackingModal';
 
 const Header: React.FC = () => {
   const { state } = useCart();
+  const navigate = useNavigate();
   const [showCheckout, setShowCheckout] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
@@ -26,15 +28,18 @@ const Header: React.FC = () => {
             <li><a href="#contact">Contact</a></li>
           </ul>
         </div>
-        <a className="btn btn-ghost text-lg sm:text-xl font-bold">
+        <button
+          className="btn btn-ghost text-lg sm:text-xl font-bold"
+          onClick={() => navigate('/')}
+        >
           <span className="text-primary">Wood</span>Shot
-        </a>
+        </button>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
-          <li><a href="/" className="font-medium">Produits</a></li>
-          <li><a href="/about" className="font-medium">À propos</a></li>
-          <li><a href="/contact" className="font-medium">Contact</a></li>
+          <li><button onClick={() => navigate('/')} className="font-medium">Produits</button></li>
+          <li><button onClick={() => navigate('/about')} className="font-medium">À propos</button></li>
+          <li><button onClick={() => navigate('/contact')} className="font-medium">Contact</button></li>
         </ul>
       </div>
       <div className="navbar-end gap-2">

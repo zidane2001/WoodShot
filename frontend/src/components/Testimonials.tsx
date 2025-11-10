@@ -4,21 +4,21 @@ const Testimonials: React.FC = () => {
   const testimonials = [
     {
       name: "Marie Dubois",
-      location: "Toronto",
+      location: "Lyon, France",
       rating: 5,
       text: "Excellent service! Le bois est arrivé parfaitement sec et la livraison était ponctuelle. Je recommande vivement WoodShot.",
       avatar: "/photos/photospersonnes/image.png"
     },
     {
       name: "Pierre Martin",
-      location: "Ottawa",
+      location: "Lyon, France",
       rating: 5,
       text: "Qualité exceptionnelle du bois de chêne. Le chauffage est efficace et l'odeur est incomparable. Service client au top!",
       avatar: "/photos/photospersonnes/image copy.png"
     },
     {
       name: "Sophie Laurent",
-      location: "Montreal",
+      location: "Lyon, France",
       rating: 5,
       text: "Depuis 3 ans, je fais confiance à WoodShot pour mon bois de chauffage. Toujours satisfait de la qualité et du prix.",
       avatar: "/photos/photospersonnes/image copy 2.png"
@@ -37,7 +37,8 @@ const Testimonials: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Desktop Grid */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
@@ -71,6 +72,44 @@ const Testimonials: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Mobile Horizontal Slider */}
+        <div className="md:hidden overflow-x-auto pb-4">
+          <div className="flex space-x-4 px-4 min-w-max">
+            {testimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-300 w-72 flex-shrink-0"
+              >
+                <div className="card-body">
+                  <div className="text-center mb-4">
+                    <div className="avatar mx-auto mb-2">
+                      <div className="w-16 h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
+                        <img
+                          src={testimonial.avatar}
+                          alt={testimonial.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-sm text-base-content">{testimonial.name}</h3>
+                    <p className="text-xs text-base-content/60">{testimonial.location}</p>
+                  </div>
+
+                  <div className="flex justify-center mb-3">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <span key={i} className="text-yellow-400 text-sm">⭐</span>
+                    ))}
+                  </div>
+
+                  <p className="text-base-content/80 italic text-sm leading-relaxed">
+                    "{testimonial.text}"
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="text-center mt-8">

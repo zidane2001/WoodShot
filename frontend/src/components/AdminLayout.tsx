@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AdminDashboard from './AdminDashboard';
 import ProductManagement from './ProductManagement';
+import OrderManagement from './OrderManagement';
+import UserManagement from './UserManagement';
 
 type AdminTab = 'dashboard' | 'products' | 'orders' | 'users';
 
@@ -23,9 +25,9 @@ const AdminLayout: React.FC = () => {
       case 'products':
         return <ProductManagement />;
       case 'orders':
-        return <div className="text-center py-16">Gestion des commandes - Bientôt disponible</div>;
+        return <OrderManagement />;
       case 'users':
-        return <div className="text-center py-16">Gestion des utilisateurs - Bientôt disponible</div>;
+        return <UserManagement />;
       default:
         return <AdminDashboard />;
     }

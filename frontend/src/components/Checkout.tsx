@@ -157,7 +157,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <div className="modal modal-open z-50">
-      <div className="modal-box max-w-5xl max-h-[95vh] overflow-y-auto">
+      <div className="modal-box max-w-5xl max-h-[95vh] overflow-y-auto overflow-x-hidden">
         <button
           className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 hover-lift z-10"
           onClick={onClose}
@@ -507,18 +507,24 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
               {/* Terms and Conditions */}
               <div className="form-control">
-                <label className="label cursor-pointer justify-start gap-4">
+                <label className="label cursor-pointer justify-start gap-3 items-start">
                   <input
                     type="checkbox"
                     name="acceptTerms"
                     checked={formData.acceptTerms}
                     onChange={handleInputChange}
-                    className="checkbox checkbox-primary"
+                    className="checkbox checkbox-primary checkbox-sm mt-1 flex-shrink-0"
                     required
                   />
-                  <span className="label-text">
-                    J'accepte les <a href="#" className="link link-primary">conditions générales de vente</a> et la <a href="#" className="link link-primary">politique de confidentialité</a> *
-                  </span>
+                  <div className="label-text text-sm leading-relaxed">
+                    <div className="sm:hidden">
+                      J'accepte les <a href="/terms" className="link link-primary text-sm">conditions générales de vente</a><br />
+                      et la <a href="/privacy" className="link link-primary text-sm">politique de confidentialité</a> *
+                    </div>
+                    <div className="hidden sm:block">
+                      J'accepte les <a href="/terms" className="link link-primary text-sm">conditions générales de vente</a> et la <a href="/privacy" className="link link-primary text-sm">politique de confidentialité</a> *
+                    </div>
+                  </div>
                 </label>
               </div>
 

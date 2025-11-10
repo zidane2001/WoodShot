@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../contexts/CartContext';
+import { useNavigate } from 'react-router-dom';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -10,16 +11,17 @@ interface MobileMenuProps {
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout, onShowTracking }) => {
   const { state } = useCart();
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       {/* Enhanced Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
 
       {/* Enhanced Menu */}
-      <div className="fixed right-0 top-0 h-full w-80 max-w-[90vw] bg-base-100 shadow-2xl transform transition-all duration-300 ease-in-out border-l border-base-300">
+      <div className="fixed left-0 top-0 h-full w-80 max-w-[90vw] bg-base-100 shadow-2xl transform transition-all duration-300 ease-in-out border-l border-base-300">
         <div className="flex flex-col h-full">
           {/* Enhanced Header */}
           <div className="flex items-center justify-between p-6 border-b border-base-300 bg-gradient-to-r from-primary/5 to-secondary/5">
@@ -29,7 +31,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout
               </div>
               <div>
                 <h2 className="text-xl font-bold text-primary">WoodShot</h2>
-                <p className="text-xs text-base-content/60">Menu mobile</p>
+                <p className="text-xs text-base-content/60"></p>
               </div>
             </div>
             <button onClick={onClose} className="btn btn-ghost btn-sm btn-circle hover-lift">
@@ -42,7 +44,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout
             <nav className="p-6">
               <ul className="space-y-3">
                 <li>
-                  <a href="#products" className="btn btn-ghost justify-start w-full hover-lift text-left h-auto py-3" onClick={onClose}>
+                  <button
+                    className="btn btn-ghost justify-start w-full hover-lift text-left h-auto py-3"
+                    onClick={() => {
+                      navigate('/');
+                      onClose();
+                    }}
+                  >
                     <div className="flex items-center gap-3">
                       <span className="text-xl">🛒</span>
                       <div>
@@ -50,10 +58,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout
                         <div className="text-xs opacity-70">Voir le catalogue</div>
                       </div>
                     </div>
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#about" className="btn btn-ghost justify-start w-full hover-lift text-left h-auto py-3" onClick={onClose}>
+                  <button
+                    className="btn btn-ghost justify-start w-full hover-lift text-left h-auto py-3"
+                    onClick={() => {
+                      navigate('/about');
+                      onClose();
+                    }}
+                  >
                     <div className="flex items-center gap-3">
                       <span className="text-xl">ℹ️</span>
                       <div>
@@ -61,10 +75,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout
                         <div className="text-xs opacity-70">Notre histoire</div>
                       </div>
                     </div>
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#contact" className="btn btn-ghost justify-start w-full hover-lift text-left h-auto py-3" onClick={onClose}>
+                  <button
+                    className="btn btn-ghost justify-start w-full hover-lift text-left h-auto py-3"
+                    onClick={() => {
+                      navigate('/contact');
+                      onClose();
+                    }}
+                  >
                     <div className="flex items-center gap-3">
                       <span className="text-xl">📞</span>
                       <div>
@@ -72,7 +92,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout
                         <div className="text-xs opacity-70">Nous joindre</div>
                       </div>
                     </div>
-                  </a>
+                  </button>
                 </li>
                 <li>
                   <button

@@ -518,6 +518,28 @@ def get_all_deliveries():
         'tracking_number': delivery.tracking_number
     } for delivery in deliveries])
 
+# Admin Dashboard Stats
+@app.route('/api/admin/dashboard', methods=['GET'])
+@jwt_required()
+def get_dashboard_stats():
+    current_user = get_jwt_identity()
+    if current_user != 'admin':
+        return jsonify({'message': 'Admin access required'}), 403
+
+    db: Session = next(get_db())
+
+    total_products = db.query(Product).count()
+    total_orders = db.query(Order).count()
+    total_users = db.query(User).count()
+    low_stock_products = db.query(Product).filter(Product.stock_quantity < 10).count()
+
+    return jsonify({
+        'total_products': total_products,
+        'total_orders': total_orders,
+        'total_users': total_users,
+        'low_stock_products': low_stock_products
+    })
+
 # Hero Images Routes
 @app.route('/api/hero-images', methods=['GET'])
 def get_hero_images():

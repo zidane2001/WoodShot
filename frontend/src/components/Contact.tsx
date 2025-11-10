@@ -30,7 +30,7 @@ const Contact: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold">Adresse</h3>
-                      <p className="text-base-content/70">15 Rue de la Forêt<br />75001 Paris, France</p>
+                      <p className="text-base-content/70">15 Rue de la Forêt<br />69000 Lyon, France</p>
                     </div>
                   </div>
 
@@ -164,17 +164,22 @@ const Contact: React.FC = () => {
           <div className="card bg-base-100 shadow-xl mt-12">
             <div className="card-body">
               <h2 className="card-title text-2xl mb-6">Notre emplacement</h2>
-              <div className="h-96 bg-base-200 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <svg className="w-16 h-16 text-base-content/40 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  <p className="text-base-content/60">Carte interactive à venir</p>
-                  <p className="text-sm text-base-content/50 mt-2">
-                    15 Rue de la Forêt, 75001 Paris, France
-                  </p>
-                </div>
+              <div className="h-96 bg-base-200 rounded-lg overflow-hidden">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2782.627!2d4.8357!3d45.7640!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47f4ea516ae8875f%3A0x6b6b6b6b6b6b6b6b!2s15%20Rue%20de%20la%20For%C3%AAt%2C%2069000%20Lyon%2C%20France!5e0!3m2!1sfr!2sfr!4v1699999999999!5m2!1sfr!2sfr"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Carte de notre emplacement à Lyon"
+                ></iframe>
+              </div>
+              <div className="mt-4 text-center">
+                <p className="text-base-content/70">
+                  <strong>Adresse :</strong> 15 Rue de la Forêt, 69000 Lyon, France
+                </p>
               </div>
             </div>
           </div>
