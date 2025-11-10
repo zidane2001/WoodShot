@@ -15,18 +15,18 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Comprehensive CORS configuration for all environments
-CORS(app,
-     origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000",
-              "https://woodshot-frontend.onrender.com", "https://woodshot.onrender.com",
-              "http://127.0.0.1:3000", "http://127.0.0.1:5173", "http://127.0.0.1:8000"],
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token",
-                    "Accept", "Accept-Version", "Content-Length", "Content-MD5"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-     max_age=86400)
+# Ultimate CORS configuration for production
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,X-CSRF-Token,Accept,Accept-Version,Content-Length,Content-MD5')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
+        response.headers.add('Access-Control-Max-Age', '86400')
+        return response
 
-# Additional CORS headers for development
 @app.after_request
 def add_cors_headers(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -35,6 +35,14 @@ def add_cors_headers(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
     response.headers.add('Access-Control-Max-Age', '86400')
     return response
+
+# CORS configuration
+CORS(app,
+     origins=["*"],
+     supports_credentials=True,
+     allow_headers=["*"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+     max_age=86400)
 
 app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
 jwt = JWTManager(app)

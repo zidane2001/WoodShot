@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-primary">📍</span>
-                <span className="text-base-content/70">Paris, France</span>
+                <span className="text-base-content/70">Lyon, France</span>
               </div>
             </div>
 
@@ -89,7 +89,7 @@ const Footer: React.FC = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-base-content/60">
-              © 2024 WoodShot. Tous droits réservés.
+              © 2025 WoodShot. Tous droits réservés.
             </div>
             <div className="flex gap-6 text-sm">
               <a href="#" className="text-base-content/60 hover:text-primary transition-colors">Conditions générales</a>
