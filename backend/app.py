@@ -625,9 +625,9 @@ def create_payment():
             'pay_currency': pay_currency,
             'order_id': data.get('order_id'),
             'order_description': data.get('description', 'WoodShot Order'),
-            'ipn_callback_url': f"{os.getenv('BASE_URL', 'http://localhost:8000')}/api/payments/callback",
-            'success_url': f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/success",
-            'cancel_url': f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/cancel"
+            'ipn_callback_url': f"{os.getenv('BASE_URL', 'https://woodshot-backend-um0v.onrender.com')}/api/payments/callback",
+            'success_url': f"{os.getenv('FRONTEND_URL', 'https://woodshot-frontend.onrender.com')}/payment/success",
+            'cancel_url': f"{os.getenv('FRONTEND_URL', 'https://woodshot-frontend.onrender.com')}/payment/cancel"
         }
 
         headers = {
@@ -648,15 +648,28 @@ def create_payment():
 
         if response.status_code == 200:
             payment_response = response.json()
-            return jsonify({
-                'payment_url': payment_response.get('invoice_url'),
-                'payment_id': payment_response.get('payment_id'),
-                'order_id': data.get('order_id'),
-                'status': 'pending'
-            }), 200
+            print(f"Payment created successfully: {payment_response}")
+
+            # Check if payment is already completed (rare but possible)
+            if payment_response.get('payment_status') == 'finished':
+                return jsonify({
+                    'payment_url': payment_response.get('invoice_url'),
+                    'payment_id': payment_response.get('payment_id'),
+                    'order_id': data.get('order_id'),
+                    'status': 'completed',
+                    'message': 'Payment already completed'
+                }), 200
+            else:
+                return jsonify({
+                    'payment_url': payment_response.get('invoice_url'),
+                    'payment_id': payment_response.get('payment_id'),
+                    'order_id': data.get('order_id'),
+                    'status': 'pending'
+                }), 200
         else:
             print(f"NowPayments error: {response.status_code} - {response.text}")
-            return jsonify({'error': 'Payment creation failed', 'detail': response.text}), 500
+            # Don't return the raw error to frontend, just a generic message
+            return jsonify({'error': 'Payment service temporarily unavailable', 'detail': 'Please try again later'}), 500
 
     except Exception as e:
         print(f"Payment error: {e}")

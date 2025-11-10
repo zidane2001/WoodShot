@@ -123,7 +123,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Erreur lors de la création du paiement');
+        throw new Error(errorData.error || errorData.detail || 'Erreur lors de la création du paiement');
       }
 
       const paymentResponse = await response.json();
