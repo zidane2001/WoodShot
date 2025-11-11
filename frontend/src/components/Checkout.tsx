@@ -76,6 +76,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const paymentData = {
         amount: totalWithDelivery,
         currency: 'EUR',
+        payment_method: formData.paymentMethod,
         crypto_currency: formData.cryptoCurrency,
         order_id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         customer_email: formData.email,
@@ -100,7 +101,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         },
         items: state.items,
         total: totalWithDelivery,
-        paymentMethod: 'crypto',
+        paymentMethod: formData.paymentMethod,
         cryptoCurrency: formData.cryptoCurrency,
         cryptoWallet: formData.cryptoWallet,
         orderId: paymentData.order_id,
@@ -435,65 +436,87 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       required
                     >
                       <option value="crypto">₿ Cryptomonnaie</option>
+                      <option value="card">💳 Carte bancaire</option>
                     </select>
                   </div>
 
                   <div className="space-y-4 mt-6">
-                    <div className="bg-base-100 p-4 rounded-lg border border-base-300">
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-2xl">₿</span>
-                        <span className="font-semibold text-base-content">Paiement en Cryptomonnaie</span>
-                      </div>
-                      <p className="text-sm text-base-content/70 mb-4">
-                        Paiement sécurisé via NowPayments. Accepte Bitcoin (BTC) et Tether (USDT) avec conversion automatique en temps réel.
-                      </p>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div className="form-control">
-                          <label className="label">
-                            <span className="label-text font-semibold">Cryptomonnaie *</span>
-                          </label>
-                          <select
-                            name="cryptoCurrency"
-                            value={formData.cryptoCurrency}
-                            onChange={handleInputChange}
-                            className="select select-bordered focus-visible"
-                            required
-                          >
-                            <option value="bitcoin">₿ Bitcoin (BTC)</option>
-                            <option value="usdt">💲 Tether (USDT)</option>
-                          </select>
+                    {formData.paymentMethod === 'crypto' && (
+                      <div className="bg-base-100 p-4 rounded-lg border border-base-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-2xl">₿</span>
+                          <span className="font-semibold text-base-content">Paiement en Cryptomonnaie</span>
                         </div>
+                        <p className="text-sm text-base-content/70 mb-4">
+                          Paiement sécurisé via NowPayments. Accepte Bitcoin (BTC) et Tether (USDT) avec conversion automatique en temps réel.
+                        </p>
 
-                        <div className="form-control">
-                          <label className="label">
-                            <span className="label-text font-semibold">Votre wallet *</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="cryptoWallet"
-                            value={formData.cryptoWallet}
-                            onChange={handleInputChange}
-                            className="input input-bordered focus-visible"
-                            placeholder="Adresse de votre wallet"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="bg-white p-3 rounded border">
-                        <div className="text-sm">
-                          <div className="font-medium text-orange-800 mb-1">Montant à envoyer:</div>
-                          <div className="text-lg font-bold text-orange-600">
-                            {formData.cryptoCurrency === 'bitcoin' && `₿ ${(totalWithDelivery / 45000).toFixed(6)}`}
-                            {formData.cryptoCurrency === 'usdt' && `₮ ${totalWithDelivery.toFixed(2)}`}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text font-semibold">Cryptomonnaie *</span>
+                            </label>
+                            <select
+                              name="cryptoCurrency"
+                              value={formData.cryptoCurrency}
+                              onChange={handleInputChange}
+                              className="select select-bordered focus-visible"
+                              required
+                            >
+                              <option value="bitcoin">₿ Bitcoin (BTC)</option>
+                              <option value="usdt">💲 Tether (USDT)</option>
+                            </select>
                           </div>
-                          <div className="text-xs text-gray-600 mt-1">
-                            Taux de conversion estimé • Mise à jour en temps réel
+
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text font-semibold">Votre wallet *</span>
+                            </label>
+                            <input
+                              type="text"
+                              name="cryptoWallet"
+                              value={formData.cryptoWallet}
+                              onChange={handleInputChange}
+                              className="input input-bordered focus-visible"
+                              placeholder="Adresse de votre wallet"
+                              required
+                            />
                           </div>
                         </div>
+
+                        <div className="bg-white p-3 rounded border">
+                          <div className="text-sm">
+                            <div className="font-medium text-orange-800 mb-1">Montant à envoyer:</div>
+                            <div className="text-lg font-bold text-orange-600">
+                              {formData.cryptoCurrency === 'bitcoin' && `₿ ${(totalWithDelivery / 45000).toFixed(6)}`}
+                              {formData.cryptoCurrency === 'usdt' && `₮ ${totalWithDelivery.toFixed(2)}`}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              Taux de conversion estimé • Mise à jour en temps réel
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {formData.paymentMethod === 'card' && (
+                      <div className="bg-base-100 p-4 rounded-lg border border-base-300">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-2xl">💳</span>
+                          <span className="font-semibold text-base-content">Paiement par carte bancaire</span>
+                        </div>
+                        <p className="text-sm text-base-content/70 mb-4">
+                          Paiement sécurisé via Square. Vos informations bancaires sont cryptées et ne sont jamais stockées.
+                        </p>
+
+                        <div className="alert alert-info">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <span>Le formulaire de paiement sécurisé apparaîtra après validation de la commande.</span>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="alert alert-info">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
