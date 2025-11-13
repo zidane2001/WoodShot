@@ -96,7 +96,7 @@ def upload_to_cloudinary(file, folder="woodshot/products"):
 
 # ===== ROUTES =====
 
-# User Authentication Routes
+# U
 @app.route('/api/auth/register', methods=['POST'])
 def register():
     try:
