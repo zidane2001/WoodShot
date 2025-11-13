@@ -87,6 +87,13 @@ const AdminLayout: React.FC = () => {
                   </a>
                 </li>
               ))}
+              <li className="divider"></li>
+              <li>
+                <a onClick={() => window.location.href = '/'}>
+                  <span className="mr-2">🏠</span>
+                  Retour au site
+                </a>
+              </li>
             </ul>
           </div>
           <a className="btn btn-ghost normal-case text-xl font-bold">
