@@ -43,7 +43,7 @@ const Header: React.FC = () => {
         </ul>
       </div>
       <div className="navbar-end gap-2">
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin')}>
+        <button className="btn btn-ghost btn-sm hidden sm:flex" onClick={() => navigate('/admin')}>
           Admin
         </button>
         <ThemeSelector />

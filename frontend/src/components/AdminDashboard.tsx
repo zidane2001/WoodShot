@@ -97,16 +97,16 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-primary mb-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-primary mb-4">
           🏢 Tableau de Bord Administrateur
         </h1>
-        <p className="text-lg text-base-content/70">
+        <p className="text-base md:text-lg text-base-content/70">
           Gérez votre plateforme e-commerce WoodShot
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <div className="flex items-center justify-between">
@@ -160,7 +160,7 @@ const AdminDashboard: React.FC = () => {
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title text-2xl mb-6">Actions Rapides</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <button className="btn btn-primary btn-lg">
               <span className="mr-2">➕</span>
               Ajouter Produit

@@ -111,6 +111,23 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onShowCheckout
                     </div>
                   </button>
                 </li>
+                <li>
+                  <button
+                    className="btn btn-ghost justify-start w-full hover-lift text-left h-auto py-3"
+                    onClick={() => {
+                      navigate('/admin');
+                      onClose();
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">⚙️</span>
+                      <div>
+                        <div className="font-medium">Administration</div>
+                        <div className="text-xs opacity-70">Panneau admin</div>
+                      </div>
+                    </div>
+                  </button>
+                </li>
               </ul>
             </nav>
 
