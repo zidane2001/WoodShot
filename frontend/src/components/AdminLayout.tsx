@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AdminDashboard from './AdminDashboard';
 import ProductManagement from './ProductManagement';
@@ -11,6 +11,29 @@ type AdminTab = 'dashboard' | 'products' | 'orders' | 'users';
 const AdminLayout: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const { user, logout, token } = useAuth();
+
+  // Check if token is expired and logout if needed
+  useEffect(() => {
+    const checkToken = async () => {
+      if (token) {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (response.status === 401) {
+            // Token expired, logout
+            logout();
+          }
+        } catch (error) {
+          console.error('Token check failed:', error);
+        }
+      }
+    };
+
+    checkToken();
+  }, [token, logout]);
 
   // If not authenticated as admin, show login
   if (!token || user?.id !== 'admin') {

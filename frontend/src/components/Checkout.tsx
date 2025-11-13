@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 
 interface CheckoutFormData {
@@ -11,14 +11,9 @@ interface CheckoutFormData {
   postalCode: string;
   deliveryDate: string;
   deliveryTime: string;
-  paymentMethod: 'card' | 'paypal' | 'bank' | 'crypto';
-  cardNumber: string;
-  expiryDate: string;
-  cvv: string;
-  paypalEmail: string;
-  bankAccount: string;
-  cryptoWallet: string;
+  paymentMethod: 'bank' | 'crypto';
   cryptoCurrency: string;
+  cryptoWallet: string;
   acceptTerms: boolean;
 }
 
@@ -34,20 +29,31 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     postalCode: '',
     deliveryDate: '',
     deliveryTime: '',
-    paymentMethod: 'card',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    paypalEmail: '',
-    bankAccount: '',
-    cryptoWallet: '',
+    paymentMethod: 'bank',
     cryptoCurrency: 'bitcoin',
+    cryptoWallet: '',
     acceptTerms: false,
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [iban, setIban] = useState<string>('Chargement...');
   const tomorrow = useMemo(() => {
     const now = new Date().getTime();
     return new Date(now + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  }, []);
+
+  useEffect(() => {
+    const fetchIban = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/iban`);
+        const data = await response.json();
+        setIban(data.iban);
+      } catch (error) {
+        console.error('Error fetching IBAN:', error);
+        setIban('IBAN non disponible');
+      }
+    };
+
+    fetchIban();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -72,7 +78,14 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setIsProcessing(true);
 
     try {
-      // Create payment request data
+      if (formData.paymentMethod === 'bank') {
+        // For bank transfers, just redirect to success page - no backend processing needed
+        dispatch({ type: 'CLEAR_CART' });
+        window.location.href = '/payment/success';
+        return;
+      }
+
+      // Create payment request data for crypto payments
       const paymentData = {
         amount: totalWithDelivery,
         currency: 'EUR',
@@ -113,7 +126,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       console.log('Total with delivery:', totalWithDelivery);
       console.log('Delivery fee:', deliveryFee);
 
-      // Call backend payment API
+      // Call backend payment API for crypto payments
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create`, {
         method: 'POST',
         headers: {
@@ -130,8 +143,10 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const paymentResponse = await response.json();
       console.log('Payment response:', paymentResponse);
 
-      // Clear cart and redirect to payment URL
+      // Clear cart
       dispatch({ type: 'CLEAR_CART' });
+
+      // For crypto payments, redirect to payment URL
       window.location.href = paymentResponse.payment_url;
 
     } catch (error) {
@@ -435,8 +450,8 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       className="select select-bordered select-lg focus-visible"
                       required
                     >
+                      <option value="bank">🏦 Virement bancaire</option>
                       <option value="crypto">₿ Cryptomonnaie</option>
-                      <option value="card">💳 Carte bancaire</option>
                     </select>
                   </div>
 
@@ -499,31 +514,35 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       </div>
                     )}
 
-                    {formData.paymentMethod === 'card' && (
+                    {formData.paymentMethod === 'bank' && (
                       <div className="bg-base-100 p-4 rounded-lg border border-base-300">
                         <div className="flex items-center gap-2 mb-4">
-                          <span className="text-2xl">💳</span>
-                          <span className="font-semibold text-base-content">Paiement par carte bancaire</span>
+                          <span className="text-2xl">🏦</span>
+                          <span className="font-semibold text-base-content">Paiement par virement bancaire</span>
                         </div>
                         <p className="text-sm text-base-content/70 mb-4">
-                          Paiement sécurisé via Square. Vos informations bancaires sont cryptées et ne sont jamais stockées.
+                          Effectuez un virement bancaire vers notre compte IBAN affiché ci-dessous.
                         </p>
 
-                        <div className="alert alert-info">
+                        <div className="bg-base-200 p-4 rounded-lg">
+                          <div className="text-center">
+                            <div className="font-mono text-lg font-bold text-primary mb-2 break-all">
+                              {iban}
+                            </div>
+                            <div className="text-sm text-base-content/60">
+                              Bénéficiaire: WoodShot SARL
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="alert alert-info mt-4">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                           </svg>
-                          <span>Le formulaire de paiement sécurisé apparaîtra après validation de la commande.</span>
+                          <span>N'oubliez pas d'indiquer votre numéro de commande dans la référence du virement.</span>
                         </div>
                       </div>
                     )}
-
-                    <div className="alert alert-info">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      <span>L'adresse de paiement vous sera fournie après validation de la commande. Le montant sera calculé au taux actuel.</span>
-                    </div>
                   </div>
                 </div>
               </div>
