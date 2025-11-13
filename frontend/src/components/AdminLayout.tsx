@@ -17,7 +17,7 @@ const AdminLayout: React.FC = () => {
     const checkToken = async () => {
       if (token) {
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+          const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },

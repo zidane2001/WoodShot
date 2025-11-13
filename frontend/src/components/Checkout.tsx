@@ -44,7 +44,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   useEffect(() => {
     const fetchIban = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/iban`);
+        const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/settings/iban`);
         const data = await response.json();
         setIban(data.iban);
       } catch (error) {

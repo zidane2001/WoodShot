@@ -27,7 +27,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/dashboard`, {
+      const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/admin/dashboard`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -45,7 +45,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/settings`, {
+      const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/admin/settings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -62,7 +62,7 @@ const AdminDashboard: React.FC = () => {
 
   const updateSettings = async (newSettings: Partial<Settings>) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/settings`, {
+      const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/admin/settings`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
