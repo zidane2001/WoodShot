@@ -25,44 +25,71 @@ ALLOWED_ORIGINS = [
     'https://woodshot-frontend.onrender.com'  # Votre URL de production
 ]
 
-# Configuration CORS unique et propre
-CORS(app, 
-     resources={r"/api/*": {
-         "origins": ALLOWED_ORIGINS,
-         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-         "allow_headers": [
-             "Content-Type",
-             "Authorization",
-             "X-Requested-With",
-             "Accept",
-             "Origin",
-             "X-Admin-Request"
-         ],
-         "expose_headers": ["Content-Type", "Authorization"],
-         "supports_credentials": True,
-         "max_age": 3600
-     }},
+# Configuration CORS complète pour toutes les routes
+CORS(app,
+     resources={
+         r"/*": {  # Appliquer à toutes les routes, pas seulement /api/*
+             "origins": ALLOWED_ORIGINS,
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+             "allow_headers": [
+                 "Content-Type",
+                 "Authorization",
+                 "X-Requested-With",
+                 "Accept",
+                 "Origin",
+                 "X-Admin-Request",
+                 "Access-Control-Request-Method",
+                 "Access-Control-Request-Headers"
+             ],
+             "expose_headers": [
+                 "Content-Type",
+                 "Authorization",
+                 "Access-Control-Allow-Origin",
+                 "Access-Control-Allow-Credentials"
+             ],
+             "supports_credentials": True,
+             "max_age": 86400  # 24 heures
+         }
+     },
      supports_credentials=True
 )
 
-# ===== HEADERS DE SÉCURITÉ =====
+# ===== HEADERS DE SÉCURITÉ ET CORS =====
 @app.after_request
 def set_security_headers(response):
-    """Ajoute uniquement les headers de sécurité nécessaires"""
-    
-    # Headers de sécurité (pas de headers CORS ici, Flask-CORS s'en occupe)
+    """Ajoute les headers de sécurité et complète CORS si nécessaire"""
+
+    # Headers de sécurité
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    
+
     # En production, ajouter HTTPS strict
     if os.getenv('FLASK_ENV') == 'production':
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    
+
+    # Headers CORS supplémentaires pour toutes les routes (au cas où Flask-CORS ne les couvre pas)
+    origin = request.headers.get('Origin')
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Admin-Request, Access-Control-Request-Method, Access-Control-Request-Headers'
+        response.headers['Access-Control-Max-Age'] = '86400'
+
     return response
 
-# NE PAS GÉRER OPTIONS MANUELLEMENT - Flask-CORS le fait automatiquement
-# Supprimer tous les handlers OPTIONS manuels
+# Gestion OPTIONS explicite pour toutes les routes
+@app.route('/<path:path>', methods=['OPTIONS'])
+def handle_options_all(path):
+    """Handle OPTIONS requests for all routes"""
+    response = app.make_response('')
+    response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Admin-Request, Access-Control-Request-Method, Access-Control-Request-Headers'
+    response.headers['Access-Control-Max-Age'] = '86400'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response, 200
 
 # Configuration JWT
 app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')

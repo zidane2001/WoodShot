@@ -6,7 +6,7 @@ import OrderManagement from './OrderManagement';
 import UserManagement from './UserManagement.tsx';
 import AdminLogin from './AdminLogin.tsx';
 
-const API_BASE_URL = 'https://woodshot-backend-um0v.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 type AdminTab = 'dashboard' | 'products' | 'orders' | 'users';
 

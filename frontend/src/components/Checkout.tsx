@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 
-const API_BASE_URL = 'https://woodshot-backend-um0v.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 interface CheckoutFormData {
   firstName: string;

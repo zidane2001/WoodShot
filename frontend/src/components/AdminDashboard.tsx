@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = 'https://woodshot-backend-um0v.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 interface DashboardStats {
   total_products: number;
