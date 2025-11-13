@@ -114,7 +114,7 @@ const AdminDashboard: React.FC = () => {
                 <h3 className="card-title text-lg">Produits</h3>
                 <p className="text-3xl font-bold text-primary">{stats?.total_products || 0}</p>
               </div>
-              <div className="text-4xl">📦</div>
+              <div className="text-4xl"></div>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@ const AdminDashboard: React.FC = () => {
                 <h3 className="card-title text-lg">Commandes</h3>
                 <p className="text-3xl font-bold text-secondary">{stats?.total_orders || 0}</p>
               </div>
-              <div className="text-4xl">📋</div>
+              <div className="text-4xl"></div>
             </div>
           </div>
         </div>
@@ -138,7 +138,7 @@ const AdminDashboard: React.FC = () => {
                 <h3 className="card-title text-lg">Utilisateurs</h3>
                 <p className="text-3xl font-bold text-accent">{stats?.total_users || 0}</p>
               </div>
-              <div className="text-4xl">👥</div>
+              <div className="text-4xl"></div>
             </div>
           </div>
         </div>
@@ -166,7 +166,7 @@ const AdminDashboard: React.FC = () => {
               Ajouter Produit
             </button>
             <button className="btn btn-secondary btn-lg">
-              <span className="mr-2">📦</span>
+              <span className="mr-2"></span>
               Gérer Stocks
             </button>
             <button className="btn btn-accent btn-lg">

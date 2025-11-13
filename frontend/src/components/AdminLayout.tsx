@@ -66,10 +66,10 @@ const AdminLayout: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'dashboard' as AdminTab, label: 'Tableau de Bord', icon: '📊', color: 'text-blue-500' },
-    { id: 'products' as AdminTab, label: 'Produits', icon: '📦', color: 'text-green-500' },
-    { id: 'orders' as AdminTab, label: 'Commandes', icon: '📋', color: 'text-orange-500' },
-    { id: 'users' as AdminTab, label: 'Utilisateurs', icon: '👥', color: 'text-purple-500' },
+    { id: 'dashboard' as AdminTab, label: 'Tableau de Bord',  shortLabel: 'Tableau', color: 'text-blue-500' },
+    { id: 'products' as AdminTab, label: 'Produits', shortLabel: 'Produits', color: 'text-green-500' },
+    { id: 'orders' as AdminTab, label: 'Commandes', shortLabel: 'Commandes', color: 'text-orange-500' },
+    { id: 'users' as AdminTab, label: 'Utilisateurs', shortLabel: 'Users', color: 'text-purple-500' },
   ];
 
   const renderContent = () => {
@@ -125,12 +125,12 @@ const AdminLayout: React.FC = () => {
 
             {/* Logo */}
             <a
-              className="btn btn-ghost normal-case text-lg lg:text-xl font-bold ml-2 lg:ml-0"
+              className="btn btn-ghost normal-case text-sm lg:text-lg font-bold ml-1 lg:ml-0 px-2"
               onClick={() => handleTabChange('dashboard')}
             >
-              <span className="text-2xl mr-2">🪵</span>
-              <span className="hidden sm:inline">WoodShot</span>
-              <span className="badge badge-primary badge-sm ml-2">Admin</span>
+              <span className="text-lg lg:text-xl mr-1 lg:mr-2">🪵</span>
+              <span className="hidden sm:inline text-sm lg:text-base">WoodShot</span>
+              <span className="badge badge-primary badge-xs lg:badge-sm ml-1 lg:ml-2 text-[10px] lg:text-xs">Admin</span>
             </a>
           </div>
 
@@ -141,15 +141,14 @@ const AdminLayout: React.FC = () => {
                 <li key={tab.id}>
                   <button
                     className={`
-                      flex items-center gap-2 transition-all
-                      ${activeTab === tab.id 
-                        ? 'bg-primary text-primary-content font-semibold' 
+                      flex items-center gap-2 transition-all text-sm py-2 px-3
+                      ${activeTab === tab.id
+                        ? 'bg-primary text-primary-content font-semibold'
                         : 'hover:bg-base-200'
                       }
                     `}
                     onClick={() => handleTabChange(tab.id)}
                   >
-                    <span className={`text-xl ${tab.color}`}>{tab.icon}</span>
                     <span>{tab.label}</span>
                   </button>
                 </li>
@@ -161,45 +160,45 @@ const AdminLayout: React.FC = () => {
           <div className="navbar-end">
             <div className="relative">
               <button
-                className="btn btn-ghost btn-circle avatar profile-menu-btn"
+                className="btn btn-ghost btn-circle avatar profile-menu-btn btn-sm lg:btn-md"
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 aria-label="Menu utilisateur"
               >
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-sm">
+                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-xs">
                   {user?.first_name?.[0] || 'A'}{user?.last_name?.[0] || 'D'}
                 </div>
               </button>
 
               {/* Profile dropdown */}
               {isProfileMenuOpen && (
-                <div className="profile-menu absolute right-0 mt-2 w-64 bg-base-100 rounded-lg shadow-xl border border-base-300 overflow-hidden z-50">
-                  <div className="bg-gradient-to-r from-primary to-secondary p-4 text-primary-content">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
+                <div className="profile-menu absolute right-0 mt-2 w-56 lg:w-64 bg-base-100 rounded-lg shadow-xl border border-base-300 overflow-hidden z-50">
+                  <div className="bg-gradient-to-r from-primary to-secondary p-3 lg:p-4 text-primary-content">
+                    <div className="flex items-center gap-2 lg:gap-3">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm lg:text-base">
                         {user?.first_name?.[0] || 'A'}{user?.last_name?.[0] || 'D'}
                       </div>
-                      <div>
-                        <p className="font-semibold">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm lg:text-base truncate">
                           {user?.first_name || 'Admin'} {user?.last_name || ''}
                         </p>
-                        <p className="text-xs opacity-90">{user?.email || 'admin@woodshot.com'}</p>
+                        <p className="text-[10px] lg:text-xs opacity-90 truncate">{user?.email || 'admin@woodshot.com'}</p>
                       </div>
                     </div>
                   </div>
 
-                  <ul className="menu p-2">
+                  <ul className="menu p-2 text-sm">
                     <li>
-                      <a className="flex items-center gap-2">
-                        <span>⚙️</span>
+                      <a className="flex items-center gap-2 py-2">
+                        <span className="text-base">⚙️</span>
                         <span>Paramètres</span>
                       </a>
                     </li>
                     <li>
-                      <a 
+                      <a
                         onClick={() => window.location.href = '/'}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 py-2"
                       >
-                        <span>🏠</span>
+                        <span className="text-base">🏠</span>
                         <span>Retour au site</span>
                       </a>
                     </li>
@@ -207,9 +206,9 @@ const AdminLayout: React.FC = () => {
                     <li>
                       <a
                         onClick={logout}
-                        className="text-error flex items-center gap-2 font-semibold"
+                        className="text-error flex items-center gap-2 font-semibold py-2"
                       >
-                        <span>🚪</span>
+                        <span className="text-base">🚪</span>
                         <span>Déconnexion</span>
                       </a>
                     </li>
@@ -231,35 +230,35 @@ const AdminLayout: React.FC = () => {
         `}
       >
         {/* Mobile menu header */}
-        <div className="bg-gradient-to-r from-primary to-secondary p-6 text-primary-content">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-3xl">🪵</span>
+        <div className="bg-gradient-to-r from-primary to-secondary p-4 text-primary-content">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">🪵</span>
             <div>
-              <h2 className="text-xl font-bold">WoodShot Admin</h2>
-              <p className="text-sm opacity-90">Panneau d'administration</p>
+              <h2 className="text-base font-bold">WoodShot Admin</h2>
+              <p className="text-xs opacity-90">Panneau d'administration</p>
             </div>
           </div>
           <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs">
               {user?.first_name?.[0] || 'A'}{user?.last_name?.[0] || 'D'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate text-sm">
+              <p className="font-semibold truncate text-xs">
                 {user?.first_name || 'Admin'} {user?.last_name || ''}
               </p>
-              <p className="text-xs opacity-75 truncate">{user?.email || 'admin@woodshot.com'}</p>
+              <p className="text-[10px] opacity-75 truncate">{user?.email || 'admin@woodshot.com'}</p>
             </div>
           </div>
         </div>
 
         {/* Mobile menu items */}
-        <div className="flex-1 overflow-y-auto py-4">
+        <div className="flex-1 overflow-y-auto py-3">
           <ul className="menu px-2 gap-1">
             {tabs.map((tab) => (
               <li key={tab.id}>
                 <button
                   className={`
-                    flex items-center gap-3 p-3 rounded-lg transition-all
+                    flex items-center gap-2 p-2.5 rounded-lg transition-all text-sm
                     ${activeTab === tab.id
                       ? 'bg-primary text-primary-content font-semibold shadow-md'
                       : 'hover:bg-base-200'
@@ -267,34 +266,31 @@ const AdminLayout: React.FC = () => {
                   `}
                   onClick={() => handleTabChange(tab.id)}
                 >
-                  <span className={`text-2xl ${activeTab === tab.id ? '' : tab.color}`}>
-                    {tab.icon}
-                  </span>
-                  <span className="text-base">{tab.label}</span>
+                  <span>{tab.label}</span>
                   {activeTab === tab.id && (
-                    <span className="ml-auto">✓</span>
+                    <span className="ml-auto text-sm">✓</span>
                   )}
                 </button>
               </li>
             ))}
           </ul>
 
-          <div className="divider px-4"></div>
+          <div className="divider px-4 my-2"></div>
 
           {/* Additional mobile menu items */}
           <ul className="menu px-2 gap-1">
             <li>
               <a
                 onClick={() => window.location.href = '/'}
-                className="flex items-center gap-3 p-3"
+                className="flex items-center gap-2 p-2.5 text-sm"
               >
-                <span className="text-2xl">🏠</span>
+                <span className="text-lg">🏠</span>
                 <span>Retour au site</span>
               </a>
             </li>
             <li>
-              <a className="flex items-center gap-3 p-3">
-                <span className="text-2xl">⚙️</span>
+              <a className="flex items-center gap-2 p-2.5 text-sm">
+                <span className="text-lg">⚙️</span>
                 <span>Paramètres</span>
               </a>
             </li>
@@ -302,12 +298,12 @@ const AdminLayout: React.FC = () => {
         </div>
 
         {/* Mobile menu footer */}
-        <div className="p-4 border-t border-base-300">
+        <div className="p-3 border-t border-base-300">
           <button
             onClick={logout}
-            className="btn btn-error btn-block gap-2"
+            className="btn btn-error btn-sm btn-block gap-2 text-sm"
           >
-            <span>🚪</span>
+            <span className="text-base">🚪</span>
             <span>Déconnexion</span>
           </button>
         </div>
@@ -322,16 +318,13 @@ const AdminLayout: React.FC = () => {
       )}
 
       {/* Active tab indicator (mobile) */}
-      <div className="lg:hidden bg-base-100 px-4 py-3 shadow-sm border-b border-base-300">
-        <div className="flex items-center gap-3">
-          <span className={`text-2xl ${tabs.find(t => t.id === activeTab)?.color}`}>
-            {tabs.find(t => t.id === activeTab)?.icon}
-          </span>
+      <div className="lg:hidden bg-base-100 px-4 py-2 shadow-sm border-b border-base-300">
+        <div className="flex items-center gap-2">
           <div>
-            <h1 className="font-bold text-lg">
+            <h1 className="font-bold text-sm">
               {tabs.find(t => t.id === activeTab)?.label}
             </h1>
-            <p className="text-xs text-base-content/60">Gestion et administration</p>
+            <p className="text-[10px] text-base-content/60">Gestion et administration</p>
           </div>
         </div>
       </div>
@@ -345,12 +338,12 @@ const AdminLayout: React.FC = () => {
 
       {/* Bottom navigation for mobile (optional) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 shadow-lg z-20">
-        <div className="grid grid-cols-4 gap-1 p-2">
+        <div className="grid grid-cols-4 gap-0.5 p-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               className={`
-                flex flex-col items-center gap-1 p-2 rounded-lg transition-all
+                flex flex-col items-center gap-0.5 py-2 px-1 rounded-lg transition-all
                 ${activeTab === tab.id
                   ? 'bg-primary/10 text-primary'
                   : 'text-base-content/60 hover:bg-base-200'
@@ -358,9 +351,8 @@ const AdminLayout: React.FC = () => {
               `}
               onClick={() => handleTabChange(tab.id)}
             >
-              <span className="text-xl">{tab.icon}</span>
-              <span className="text-xs font-medium truncate w-full text-center">
-                {tab.label.split(' ')[0]}
+              <span className="text-[10px] font-medium truncate w-full text-center leading-tight">
+                {tab.shortLabel}
               </span>
             </button>
           ))}
@@ -368,7 +360,7 @@ const AdminLayout: React.FC = () => {
       </div>
 
       {/* Add padding to main content for bottom nav */}
-      <div className="h-20 lg:hidden"></div>
+      <div className="h-16 lg:hidden"></div>
 
       <style>{`
         @keyframes fade-in {
