@@ -43,6 +43,9 @@ const Header: React.FC = () => {
         </ul>
       </div>
       <div className="navbar-end gap-2">
+        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin')}>
+          Admin
+        </button>
         <ThemeSelector />
         <div className="dropdown dropdown-end">
           <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
