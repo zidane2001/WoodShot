@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
+const API_BASE_URL = 'https://woodshot-backend-um0v.onrender.com';
+
 interface DashboardStats {
   total_products: number;
   total_orders: number;
@@ -27,7 +29,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/admin/dashboard`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -45,7 +47,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/admin/settings`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/settings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -62,7 +64,7 @@ const AdminDashboard: React.FC = () => {
 
   const updateSettings = async (newSettings: Partial<Settings>) => {
     try {
-      const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/admin/settings`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/settings`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

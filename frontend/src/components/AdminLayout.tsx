@@ -6,6 +6,8 @@ import OrderManagement from './OrderManagement';
 import UserManagement from './UserManagement.tsx';
 import AdminLogin from './AdminLogin.tsx';
 
+const API_BASE_URL = 'https://woodshot-backend-um0v.onrender.com';
+
 type AdminTab = 'dashboard' | 'products' | 'orders' | 'users';
 
 const AdminLayout: React.FC = () => {
@@ -17,7 +19,7 @@ const AdminLayout: React.FC = () => {
     const checkToken = async () => {
       if (token) {
         try {
-          const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/auth/me`, {
+          const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },

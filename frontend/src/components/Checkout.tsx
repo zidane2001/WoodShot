@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 
+const API_BASE_URL = 'https://woodshot-backend-um0v.onrender.com';
+
 interface CheckoutFormData {
   firstName: string;
   lastName: string;
@@ -44,7 +46,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   useEffect(() => {
     const fetchIban = async () => {
       try {
-        const response = await fetch(`https://woodshot-backend-um0v.onrender.com/api/settings/iban`);
+        const response = await fetch(`${API_BASE_URL}/api/settings/iban`);
         const data = await response.json();
         setIban(data.iban);
       } catch (error) {
