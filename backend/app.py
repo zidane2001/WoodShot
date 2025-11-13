@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, redirect
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from sqlalchemy.orm import Session
@@ -959,6 +959,24 @@ def payment_callback():
     except Exception as e:
         print(f"Callback error: {e}")
         return jsonify({'error': 'Callback processing failed'}), 500
+
+# ===== GESTION DES ROUTES SPA =====
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    """Redirect all non-API routes to frontend"""
+    if path.startswith('api/'):
+        return jsonify({'message': 'API route not found'}), 404
+
+    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+
+    # Préserver le chemin demandé dans la redirection
+    if path:
+        redirect_url = f"{frontend_url}/{path}"
+    else:
+        redirect_url = frontend_url
+
+    return redirect(redirect_url, code=302)
 
 
 if __name__ == '__main__':
