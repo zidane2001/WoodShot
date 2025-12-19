@@ -2,6 +2,7 @@ services:
   - type: web
     name: woodshot-backend
     runtime: python
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
@@ -9,3 +10,15 @@ services:
         value: production
       - key: FRONTEND_URL
         value: https://woodshot-frontend.onrender.com
+
+  - type: web
+    name: woodshot-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: redirect
+        source: /*
+        destination: /index.html
+        status: 200
