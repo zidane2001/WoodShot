@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: woodshot-backend
+    name: woodshots-backend
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
@@ -9,10 +9,26 @@ services:
       - key: FLASK_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://woodshot-frontend.onrender.com
+        value: https://woodshots-frontend.onrender.com
+      - key: BASE_URL
+        value: https://woodshots-backend.onrender.com
+      - key: DATABASE_URL
+        value: postgresql://wood_db_7clw_user:TOqXheZfQmBm0C0tJmZrtUbPQrhlGrZx@dpg-d46ftipr0fns73avammg-a.oregon-postgres.render.com/wood_db_7clw
+      - key: SECRET_KEY
+        value: 5hqsYxORrb9ZR8ClDH7ay4HrhPJ2QJ1feqHqVyOayrg
+      - key: ADMIN_PIN
+        value: 2017
+      - key: NOWPAYMENTS_API_KEY
+        value: uGqlVng6ng9v5kQ07Q/I02XeLRoyKShz
+      - key: CLOUDINARY_CLOUD_NAME
+        value: djxiszqgd
+      - key: CLOUDINARY_API_KEY
+        value: 551338185125665
+      - key: CLOUDINARY_API_SECRET
+        value: z554bu4pErPADN3X76gJ74LBBB4
 
   - type: web
-    name: woodshot-frontend
+    name: woodshots-frontend
     runtime: static
     rootDir: frontend
     buildCommand: npm run build
