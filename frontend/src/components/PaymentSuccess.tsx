@@ -2,8 +2,16 @@ import React, { useEffect, useState } from 'react';
 
 const PaymentSuccess: React.FC = () => {
   const [iban, setIban] = useState<string>('');
+  const [paymentResponse, setPaymentResponse] = useState<any>(null);
 
   useEffect(() => {
+    // Get payment response from localStorage
+    const storedResponse = localStorage.getItem('paymentResponse');
+    if (storedResponse) {
+      setPaymentResponse(JSON.parse(storedResponse));
+      localStorage.removeItem('paymentResponse'); // Clean up
+    }
+
     const fetchIban = async () => {
       try {
         const response = await fetch('/api/settings/iban');
@@ -35,38 +43,90 @@ const PaymentSuccess: React.FC = () => {
               </div>
 
               <div className="space-y-6">
-                <div className="alert alert-info">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <div>
-                    <h3 className="font-bold">Paiement par Virement Bancaire</h3>
-                    <p className="text-sm">Veuillez effectuer un virement bancaire vers le compte ci-dessous.</p>
+                {paymentResponse?.payment_method === 'crypto' ? (
+                  <div className="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                      <h3 className="font-bold">Paiement en Cryptomonnaie</h3>
+                      <p className="text-sm">Veuillez envoyer le paiement vers l'adresse ci-dessous.</p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                      <h3 className="font-bold">Paiement par Virement Bancaire</h3>
+                      <p className="text-sm">Veuillez effectuer un virement bancaire vers le compte ci-dessous.</p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="bg-base-200 p-6 rounded-lg space-y-4">
                   <h2 className="text-xl font-bold text-center mb-4">📋 Informations de Paiement</h2>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="label">
-                        <span className="label-text font-semibold">IBAN</span>
-                      </label>
-                      <div className="font-mono bg-base-100 p-3 rounded border text-lg break-all">
-                        {iban}
+                  {paymentResponse?.payment_method === 'crypto' ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">Cryptomonnaie</span>
+                        </label>
+                        <div className="font-semibold text-lg">
+                          {paymentResponse.crypto_currency?.toUpperCase()}
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <label className="label">
-                        <span className="label-text font-semibold">Bénéficiaire</span>
-                      </label>
-                      <div className="font-semibold text-lg">
-                        WoodShot SARL
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">Adresse de Dépôt</span>
+                        </label>
+                        <div className="font-mono bg-base-100 p-3 rounded border text-lg break-all">
+                          {paymentResponse.crypto_address}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">Montant à Envoyer</span>
+                        </label>
+                        <div className="font-semibold text-lg">
+                          {paymentResponse.amount}€
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">Instructions</span>
+                        </label>
+                        <div className="text-sm bg-base-100 p-3 rounded border">
+                          {paymentResponse.instructions}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">IBAN</span>
+                        </label>
+                        <div className="font-mono bg-base-100 p-3 rounded border text-lg break-all">
+                          {paymentResponse?.iban || iban}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">Bénéficiaire</span>
+                        </label>
+                        <div className="font-semibold text-lg">
+                          WoodShot SARL
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="alert alert-warning">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 h-6 w-6">
@@ -75,8 +135,10 @@ const PaymentSuccess: React.FC = () => {
                     <div>
                       <div className="font-bold">Important !</div>
                       <div className="text-sm">
-                        N'oubliez pas d'indiquer la référence de votre commande dans la description du virement.
-                        Le traitement de votre commande commencera dès réception du paiement.
+                        {paymentResponse?.payment_method === 'crypto'
+                          ? "Le traitement de votre commande commencera dès réception de la confirmation de transaction sur la blockchain."
+                          : "N'oubliez pas d'indiquer la référence de votre commande dans la description du virement. Le traitement de votre commande commencera dès réception du paiement."
+                        }
                       </div>
                     </div>
                   </div>

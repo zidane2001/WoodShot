@@ -939,6 +939,36 @@ def create_bank_payment(data):
         print(f"Bank payment error: {e}")
         return jsonify({'error': 'Bank payment setup failed', 'detail': str(e)}), 500
 
+def create_crypto_payment(data):
+    """Handle cryptocurrency payments"""
+    try:
+        crypto_currency = data.get('crypto_currency', 'bitcoin')
+        amount = data.get('amount', 0)
+        order_id = data.get('order_id')
+
+        # For now, return a placeholder response
+        # In a real implementation, you would integrate with a crypto payment gateway
+        success_url = f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/success"
+
+        # Placeholder crypto address - in production, generate unique addresses
+        crypto_address = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'  # Example Bitcoin address
+
+        return jsonify({
+            'payment_url': success_url,
+            'payment_id': f'crypto_{order_id}',
+            'order_id': order_id,
+            'status': 'pending',
+            'payment_method': 'crypto',
+            'crypto_currency': crypto_currency,
+            'crypto_address': crypto_address,
+            'amount': amount,
+            'instructions': f'Please send {amount} EUR worth of {crypto_currency.upper()} to address: {crypto_address}. Include order reference: {order_id} in the transaction memo if possible.'
+        }), 200
+
+    except Exception as e:
+        print(f"Crypto payment error: {e}")
+        return jsonify({'error': 'Crypto payment setup failed', 'detail': str(e)}), 500
+
 @app.route('/api/payments/callback', methods=['POST'])
 def payment_callback():
     try:

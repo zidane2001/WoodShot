@@ -81,7 +81,18 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
     try {
       if (formData.paymentMethod === 'bank') {
-        // For bank transfers, just redirect to success page - no backend processing needed
+        // For bank transfers, create a mock payment response
+        const mockPaymentResponse = {
+          payment_method: 'bank',
+          iban: iban,
+          amount: totalWithDelivery,
+          order_id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+
+        // Store payment response for success page
+        localStorage.setItem('paymentResponse', JSON.stringify(mockPaymentResponse));
+
+        // Clear cart
         dispatch({ type: 'CLEAR_CART' });
         window.location.href = '/payment/success';
         return;
@@ -148,6 +159,9 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       // Clear cart
       dispatch({ type: 'CLEAR_CART' });
 
+      // Store payment response for success page
+      localStorage.setItem('paymentResponse', JSON.stringify(paymentResponse));
+
       // For crypto payments, redirect to payment URL
       window.location.href = paymentResponse.payment_url;
 
@@ -200,9 +214,8 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                 <div className="space-y-4 max-h-64 overflow-y-auto">
                   {state.items.map((item, index) => (
-                    <div key={item.product.id} className={`flex justify-between items-center p-3 rounded-lg fade-in ${
-                      index % 2 === 0 ? 'bg-base-200/50' : 'bg-base-100'
-                    }`} style={{ animationDelay: `${index * 0.1}s` }}>
+                    <div key={item.product.id} className={`flex justify-between items-center p-3 rounded-lg fade-in ${index % 2 === 0 ? 'bg-base-200/50' : 'bg-base-100'
+                      }`} style={{ animationDelay: `${index * 0.1}s` }}>
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <img
