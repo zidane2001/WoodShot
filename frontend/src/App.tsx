@@ -11,7 +11,7 @@ import Contact from './components/Contact';
 import About from './components/About';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
-import PaymentSuccess from './components/PaymentSuccess.tsx';
+import PaymentSuccess from './components/PaymentSuccess';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
 

@@ -922,7 +922,7 @@ def create_bank_payment(data):
         iban = iban_setting.value
 
         # Create bank transfer instructions
-        success_url = f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/success"
+        success_url = "/payment/success"
 
         return jsonify({
             'payment_url': success_url,
@@ -948,7 +948,7 @@ def create_crypto_payment(data):
 
         # For now, return a placeholder response
         # In a real implementation, you would integrate with a crypto payment gateway
-        success_url = f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/success"
+        success_url = "/payment/success"
 
         # Placeholder crypto address - in production, generate unique addresses
         crypto_address = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'  # Example Bitcoin address

@@ -1,0 +1,395 @@
+# 🪵 WOODSHOT - COMPLETE PROJECT STRUCTURE & API DOCUMENTATION
+
+## 📁 PROJECT STRUCTURE
+
+```
+woodshot/
+├── backend/                          # Flask Backend
+│   ├── app.py                        # Main Flask application
+│   ├── database.py                   # Database configuration
+│   ├── models.py                     # SQLAlchemy models
+│   ├── requirements.txt              # Python dependencies
+│   ├── alembic/                      # Database migrations
+│   │   ├── versions/                 # Migration files
+│   │   └── alembic.ini
+│   ├── __init__.py
+│   └── woodshot.db                   # SQLite database (local)
+├── frontend/                         # React Frontend
+│   ├── src/
+│   │   ├── components/               # React components
+│   │   │   ├── Header.tsx
+│   │   │   ├── Hero.tsx
+│   │   │   ├── ProductGrid.tsx
+│   │   │   ├── ProductCard.tsx
+│   │   │   ├── ProductDetail.tsx
+│   │   │   ├── Checkout.tsx
+│   │   │   ├── PaymentSuccess.tsx
+│   │   │   ├── AdminDashboard.tsx
+│   │   │   ├── ProductManagement.tsx
+│   │   │   ├── OrderManagement.tsx
+│   │   │   ├── UserManagement.tsx
+│   │   │   └── ...
+│   │   ├── contexts/                 # React contexts
+│   │   │   ├── AuthContext.tsx
+│   │   │   └── CartContext.tsx
+│   │   ├── App.tsx                   # Main React app
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.tsx
+│   ├── public/                       # Static assets
+│   │   ├── _redirects                # SPA routing rules
+│   │   └── photos/                   # Product images
+│   ├── package.json                  # Node dependencies
+│   ├── vite.config.ts                # Vite configuration
+│   ├── tsconfig.json
+│   └── eslint.config.js
+└── README.md
+```
+
+## 🔧 BACKEND API ENDPOINTS
+
+### AUTHENTICATION ROUTES
+```
+POST /api/auth/register
+- Register new user
+- Body: {email, password, first_name, last_name, phone}
+- Response: {access_token, user: {id, email, first_name, last_name}}
+
+POST /api/auth/login
+- User login
+- Body: {email, password}
+- Response: {access_token, user: {id, email, first_name, last_name}}
+
+POST /api/auth/admin
+- Admin access with PIN
+- Body: {pin}
+- Response: {access_token, is_admin: true}
+
+GET /api/auth/me
+- Get current user info (JWT required)
+- Response: {id, email, first_name, last_name, phone, is_active, is_admin}
+```
+
+### PRODUCT MANAGEMENT
+```
+GET /api/products
+- Get all available products
+- Response: [{id, name, description, wood_type, price_per_unit, unit, stock_quantity, image_url, specifications}]
+
+POST /api/products (Admin only)
+- Create new product
+- Form data: name, description, wood_type, price_per_unit, unit, stock_quantity, specifications, image(file)
+- Response: {id, message}
+
+PUT /api/products/<id> (Admin only)
+- Update product
+- Form data: same as create
+- Response: {message}
+
+DELETE /api/products/<id> (Admin only)
+- Delete product
+- Response: {message}
+```
+
+### ADDRESS MANAGEMENT
+```
+GET /api/addresses (JWT required)
+- Get user's addresses
+- Response: [{id, street, city, postal_code, country, is_default}]
+
+POST /api/addresses (JWT required)
+- Create new address
+- Body: {street, city, postal_code, country, is_default}
+- Response: {id, message}
+
+PUT /api/addresses/<id> (JWT required)
+- Update address
+- Body: {street, city, postal_code, country, is_default}
+- Response: {message}
+
+DELETE /api/addresses/<id> (JWT required)
+- Delete address
+- Response: {message}
+```
+
+### ORDER MANAGEMENT
+```
+GET /api/orders (JWT required)
+- Get user's orders or all orders (Admin)
+- Response: [{id, total_amount, status, created_at, user_id}]
+
+POST /api/orders (JWT required)
+- Create new order
+- Body: {items: [{product_id, quantity}], customer, delivery, total, paymentMethod}
+- Response: {id, message, total_amount}
+
+PUT /api/orders/<id> (JWT required)
+- Update order status
+- Body: {status}
+- Response: {message}
+```
+
+### DELIVERY MANAGEMENT
+```
+GET /api/deliveries (JWT required)
+- Get user's deliveries or all deliveries (Admin)
+- Response: [{id, order_id, address: {...}, delivery_date, status, tracking_number, notes}]
+
+POST /api/deliveries (Admin only)
+- Create delivery
+- Body: {order_id, address_id, delivery_date, status, tracking_number, notes}
+- Response: {id, message}
+
+PUT /api/deliveries/<id> (Admin only)
+- Update delivery
+- Body: {delivery_date, status, tracking_number, notes}
+- Response: {message}
+```
+
+### PAYMENT SYSTEM
+```
+POST /api/payments/create
+- Create payment (crypto or bank)
+- Body: {amount, currency, payment_method, crypto_currency?, order_id, customer_email, customer_name, description}
+- Response: {payment_url, payment_id, order_id, status, payment_method, ...}
+
+POST /api/payments/callback
+- Payment gateway callback
+- Body: {payment_status, order_id}
+- Response: {status: 'ok'}
+```
+
+### SETTINGS & CONFIGURATION
+```
+GET /api/settings/iban
+- Get IBAN for bank payments
+- Response: {iban}
+
+GET /api/admin/settings (Admin only)
+- Get all settings
+- Response: {key: value, ...}
+
+POST /api/admin/settings (Admin only)
+- Update settings
+- Body: {key: value, ...}
+- Response: {message}
+```
+
+### HERO IMAGES
+```
+GET /api/hero-images
+- Get active hero images
+- Response: [{id, title, description, image_url, display_order}]
+
+POST /api/hero-images (Admin only)
+- Create hero image
+- Form data: title, description, display_order, image(file)
+- Response: {id, message}
+
+PUT /api/hero-images/<id> (Admin only)
+- Update hero image
+- Form data: title, description, display_order, is_active, image(file)
+- Response: {message}
+
+DELETE /api/hero-images/<id> (Admin only)
+- Delete hero image
+- Response: {message}
+```
+
+### ADMIN DASHBOARD
+```
+GET /api/admin/users (Admin only)
+- Get all users
+- Response: [{id, email, first_name, last_name, phone, is_active, created_at}]
+
+GET /api/admin/orders (Admin only)
+- Get all orders
+- Response: [{id, user: {...}, total_amount, status, created_at}]
+
+GET /api/admin/deliveries (Admin only)
+- Get all deliveries
+- Response: [{id, order_id, user: {...}, address: {...}, delivery_date, status, tracking_number}]
+
+GET /api/admin/dashboard (Admin only)
+- Get dashboard statistics
+- Response: {total_products, total_orders, total_users, low_stock_products}
+```
+
+## 🎨 FRONTEND COMPONENTS
+
+### MAIN COMPONENTS
+- App.tsx - Main application with routing
+- Header.tsx - Navigation and cart
+- Hero.tsx - Landing page hero section
+- ProductGrid.tsx - Product listing and filtering
+- ProductCard.tsx - Individual product display
+- ProductDetail.tsx - Product detail modal
+- Checkout.tsx - Payment and order form
+- PaymentSuccess.tsx - Order confirmation page
+- Contact.tsx - Contact page
+- About.tsx - About page
+- TermsOfService.tsx - Terms page
+- PrivacyPolicy.tsx - Privacy page
+- FAQ.tsx - FAQ page
+- DeliveryAreas.tsx - Delivery zones
+- Testimonials.tsx - Customer testimonials
+- Footer.tsx - Site footer
+
+### ADMIN COMPONENTS
+- AdminLayout.tsx - Admin dashboard layout
+- AdminDashboard.tsx - Admin statistics
+- ProductManagement.tsx - Product CRUD
+- OrderManagement.tsx - Order management
+- UserManagement.tsx - User management
+- DeliveryTracker.tsx - Delivery tracking
+- TrackingModal.tsx - Tracking modal
+
+### CONTEXTS
+- AuthContext.tsx - Authentication state management
+- CartContext.tsx - Shopping cart state management
+
+## 🗄️ DATABASE MODELS
+
+### CORE MODELS
+- User - Customer accounts
+  - id, email, password_hash, first_name, last_name, phone, is_active, created_at
+
+- Product - Wood products
+  - id, name, description, wood_type, price_per_unit, unit, stock_quantity, image_url, specifications, is_available, created_at
+
+- Inventory - Stock management
+  - id, product_id, quantity, location, last_updated
+
+- Order - Customer orders
+  - id, user_id, total_amount, status, created_at
+
+- OrderItem - Order line items
+  - id, order_id, product_id, quantity, unit_price, total_price
+
+- Address - Delivery addresses
+  - id, user_id, street, city, postal_code, country, is_default
+
+- Delivery - Shipping information
+  - id, order_id, address_id, delivery_date, status, tracking_number, notes
+
+- HeroImage - Homepage images
+  - id, title, description, image_url, display_order, is_active
+
+- Settings - Application settings
+  - id, key, value, description
+
+## 🔐 AUTHENTICATION & SECURITY
+
+- JWT Tokens - Session management with 24h expiration
+- Admin PIN - Simple admin access control (PIN: 2017)
+- CORS - Cross-origin request handling
+- Input Validation - Data sanitization and validation
+- Password Hashing - Werkzeug secure password hashing
+- Security Headers - X-Content-Type-Options, X-Frame-Options, etc.
+
+## 💳 PAYMENT INTEGRATION
+
+### BANK TRANSFERS
+- IBAN configuration via admin settings
+- Manual payment instructions generation
+- Order reference tracking in transaction descriptions
+- Success page with payment details
+
+### CRYPTOCURRENCY (BITCOIN/USDT)
+- Address generation (placeholder implementation)
+- Payment instructions with amount and address
+- Transaction reference inclusion
+- NowPayments API integration ready
+- Support for Bitcoin and Tether
+
+## 🚀 DEVELOPMENT SETUP
+
+### BACKEND SETUP
+```bash
+cd backend
+pip install -r requirements.txt
+python app.py  # Runs on http://localhost:8000
+```
+
+### FRONTEND SETUP
+```bash
+cd frontend
+npm install
+npm run dev  # Runs on http://localhost:5173
+```
+
+### ENVIRONMENT VARIABLES
+
+#### BACKEND (.env)
+DATABASE_URL=postgresql://... (Neon PostgreSQL)
+SECRET_KEY=woodshot_super_secret_key_2024
+ADMIN_PIN=2017
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+NOWPAYMENTS_API_KEY=...
+NOWPAYMENTS_PUBLIC_KEY=...
+BASE_URL=https://woodshot-backend-um0v.onrender.com
+FRONTEND_URL=http://localhost:5173
+FLASK_ENV=development
+
+#### FRONTEND (.env)
+VITE_API_URL=http://localhost:8000
+VITE_FRONTEND_URL=http://localhost:5173
+
+## 📊 KEY FEATURES
+
+✅ Product Catalog - Wood products with images and specifications
+✅ Shopping Cart - Add/remove products with quantity management
+✅ User Authentication - Registration, login, JWT sessions
+✅ Order Management - Complete order lifecycle from creation to delivery
+✅ Payment Processing - Bank transfers and cryptocurrency payments
+✅ Admin Dashboard - Full CRUD operations for all entities
+✅ Responsive Design - Mobile-friendly with DaisyUI components
+✅ Image Upload - Cloudinary integration for product images
+✅ Database Migrations - Alembic for schema version control
+✅ Email Notifications - Ready for SMTP integration
+✅ Multi-language Support - French interface
+✅ SEO Friendly - Meta tags and structured data
+✅ Performance Optimized - Lazy loading and code splitting
+
+## 🛠️ TECHNOLOGIES USED
+
+### BACKEND
+- Python 3.13
+- Flask 3.1
+- SQLAlchemy 2.0
+- PostgreSQL (Neon)
+- JWT Extended 4.7
+- Cloudinary 1.44
+- Alembic 1.17
+- Werkzeug 3.1
+
+### FRONTEND
+- React 19.1
+- TypeScript 5.9
+- Vite 7.1
+- React Router 7.9
+- Tailwind CSS 4.1
+- DaisyUI 5.4
+- React Icons
+
+### DEPLOYMENT
+- Render (Backend & Frontend)
+- Neon (Database)
+- Cloudinary (Media Storage)
+
+## 🔄 WORKFLOW
+
+1. User browses products on homepage
+2. Adds items to cart
+3. Proceeds to checkout
+4. Fills personal and delivery information
+5. Selects payment method (Bank/Crypto)
+6. Submits order and gets payment instructions
+7. Completes payment manually
+8. Receives order confirmation
+9. Admin manages orders and deliveries
+10. Customer tracks delivery status
+
+This is a complete e-commerce solution for wood products with modern web technologies, secure payments, and comprehensive admin features.
