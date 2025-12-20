@@ -6,18 +6,27 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database URL - PostgreSQL for production
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://woodshot_user:wood_001@db:5432/woodshot_db")
+# Database URL - PostgreSQL for production, SQLite for local development
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./woodshot.db")
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,  # Verify connections before use
-    pool_recycle=300,    # Recycle connections after 5 minutes
-    echo=False,          # Set to True for SQL query logging in development
-    connect_args={
-        "sslmode": "require"  # Neon requires SSL
-    }
-)
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=300,
+        echo=False,
+        connect_args={"check_same_thread": False}  # SQLite specific
+    )
+else:
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,  # Verify connections before use
+        pool_recycle=300,    # Recycle connections after 5 minutes
+        echo=False,          # Set to True for SQL query logging in development
+        connect_args={
+            "sslmode": "require"  # Neon requires SSL
+        }
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

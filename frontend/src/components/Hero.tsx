@@ -10,7 +10,7 @@ const Hero: React.FC = () => {
         <img
           src="/photos/imagefond.png"
           alt="Bois de chauffage"
-          className="w-full h-full object-cover object-center opacity-40"
+          className="w-full h-full object-cover object-center opacity-45"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-base-100/80 via-base-100/60 to-base-100/80"></div>
       </div>
