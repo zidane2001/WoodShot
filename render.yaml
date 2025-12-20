@@ -33,7 +33,7 @@ services:
       - key: MAIL_USE_TLS
         value: "true"
       - key: MAIL_USERNAME
-        value: "your-email@gmail.com"
+        value: "colliselect@gmail.com"
       - key: MAIL_PASSWORD
         value: "your-app-password"
 
