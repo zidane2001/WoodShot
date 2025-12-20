@@ -139,6 +139,33 @@ def send_order_confirmation_email(order_data, customer_email):
     """Send order confirmation email to customer"""
     try:
         # Create HTML email content
+        from datetime import datetime
+
+        customer_name = order_data['customer']['firstName']
+        order_id = order_data['orderId']
+        current_date = datetime.now().strftime('%d/%m/%Y')
+
+        # Build product list HTML
+        product_list_html = ""
+        for item in order_data['items']:
+            product_list_html += f"<p>• {item['product']['name']} - Quantité: {item['quantity']} - {item['totalPrice']}€</p>"
+
+        # Build delivery info
+        delivery_html = f"""
+        <p>{order_data['delivery']['address']}</p>
+        <p>{order_data['delivery']['postalCode']} {order_data['delivery']['city']}</p>
+        """
+
+        if order_data['delivery'].get('date'):
+            delivery_html += f"<p><strong>Date souhaitée:</strong> {order_data['delivery']['date']}</p>"
+
+        if order_data['delivery'].get('time'):
+            delivery_html += f"<p><strong>Créneau:</strong> {order_data['delivery']['time']}</p>"
+
+        # Payment method
+        payment_method = 'Virement bancaire' if order_data['paymentMethod'] == 'bank' else 'Cryptomonnaie'
+        crypto_info = f"<p><strong>Cryptomonnaie:</strong> {order_data['cryptoCurrency'].upper()}</p>" if order_data.get('cryptoCurrency') else ""
+
         html_content = f"""
         <!DOCTYPE html>
         <html lang="fr">
@@ -160,33 +187,30 @@ def send_order_confirmation_email(order_data, customer_email):
             <div class="container">
                 <div class="header">
                     <h1>🎉 Commande Confirmée !</h1>
-                    <p>Merci pour votre confiance, {order_data['customer']['firstName']} !</p>
+                    <p>Merci pour votre confiance, {customer_name} !</p>
                 </div>
 
                 <div class="content">
                     <h2>Détails de votre commande</h2>
-                    <p><strong>Numéro de commande:</strong> {order_data['orderId']}</p>
-                    <p><strong>Date:</strong> {new Date().toLocaleDateString('fr-FR')}</p>
+                    <p><strong>Numéro de commande:</strong> {order_id}</p>
+                    <p><strong>Date:</strong> {current_date}</p>
 
                     <div class="order-details">
                         <h3>📦 Articles commandés</h3>
-                        {"".join(f"<p>• {item['product']['name']} - Quantité: {item['quantity']} - {item['totalPrice']}€</p>" for item in order_data['items'])}
+                        {product_list_html}
                         <hr>
                         <p><strong>Total: {order_data['total']}€</strong></p>
                     </div>
 
                     <div class="order-details">
                         <h3>🚚 Adresse de livraison</h3>
-                        <p>{order_data['delivery']['address']}</p>
-                        <p>{order_data['delivery']['postalCode']} {order_data['delivery']['city']}</p>
-                        {"<p><strong>Date souhaitée:</strong> " + order_data['delivery']['date'] + "</p>" if order_data['delivery'].get('date') else ""}
-                        {"<p><strong>Créneau:</strong> " + order_data['delivery']['time'] + "</p>" if order_data['delivery'].get('time') else ""}
+                        {delivery_html}
                     </div>
 
                     <div class="order-details">
                         <h3>💳 Informations de paiement</h3>
-                        <p><strong>Méthode:</strong> {order_data['paymentMethod'] == 'bank' and 'Virement bancaire' or 'Cryptomonnaie'}</p>
-                        {"<p><strong>Cryptomonnaie:</strong> " + order_data['cryptoCurrency'].upper() + "</p>" if order_data.get('cryptoCurrency') else ""}
+                        <p><strong>Méthode:</strong> {payment_method}</p>
+                        {crypto_info}
                         <p style="color: #dc2626; font-weight: bold;">
                             ⚠️ Important: Veuillez envoyer une capture d'écran de votre paiement au +1 (343) 453-6714
                         </p>
@@ -1055,10 +1079,11 @@ def create_payment():
             'cryptoCurrency': data.get('crypto_currency')
         }
 
-        # Send confirmation email
+        # Send confirmation email (temporarily to test email for simulation)
         customer_email = data.get('customer_email')
+        test_email = "zidanetenkeu@gmail.com"  # Test email for simulation
         if customer_email:
-            send_order_confirmation_email(order_data, customer_email)
+            send_order_confirmation_email(order_data, test_email)
 
         if payment_method == 'crypto':
             return create_crypto_payment(data)
@@ -1151,6 +1176,51 @@ def payment_callback():
     except Exception as e:
         print(f"Callback error: {e}")
         return jsonify({'error': 'Callback processing failed'}), 500
+
+@app.route('/api/test-email', methods=['POST'])
+def test_email():
+    """Test endpoint to send a sample order confirmation email"""
+    try:
+        # Sample order data for testing
+        sample_order_data = {
+            'orderId': 'WS-TEST-001',
+            'customer': {
+                'firstName': 'Jean',
+                'lastName': 'Dupont',
+                'email': 'test@example.com'
+            },
+            'delivery': {
+                'address': '123 rue de la Forêt',
+                'city': 'Paris',
+                'postalCode': '75001',
+                'date': '25/12/2025',
+                'time': '14-18'
+            },
+            'items': [
+                {
+                    'product': {'name': 'Bois de Chauffage Chêne'},
+                    'quantity': 2,
+                    'totalPrice': 45.00
+                },
+                {
+                    'product': {'name': 'Bois de Chauffage Bouleau'},
+                    'quantity': 1,
+                    'totalPrice': 22.50
+                }
+            ],
+            'total': 67.50,
+            'paymentMethod': 'bank',
+            'cryptoCurrency': None
+        }
+
+        # Send test email to zidanetenkeu@gmail.com
+        send_order_confirmation_email(sample_order_data, "zidanetenkeu@gmail.com")
+
+        return jsonify({'message': 'Test email sent successfully to zidanetenkeu@gmail.com'}), 200
+
+    except Exception as e:
+        print(f"Test email error: {e}")
+        return jsonify({'error': f'Failed to send test email: {str(e)}'}), 500
 
 # ===== GESTION DES ROUTES SPA =====
 @app.route('/', defaults={'path': ''})
