@@ -364,6 +364,15 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({ isOpen, onClo
               <span className="mr-2">🖨️</span>
               Imprimer les instructions
             </button>
+            <a
+              href="https://wa.me/13434536714?text=Bonjour, j'ai effectué un paiement et je vous envoie la capture d'écran pour confirmation."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-success"
+            >
+              <span className="mr-2">📱</span>
+              Envoyer via WhatsApp
+            </a>
             <button
               onClick={onClose}
               className="btn btn-primary"
