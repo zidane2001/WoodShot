@@ -21,6 +21,7 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 ALLOWED_ORIGINS = [
     FRONTEND_URL,
     'http://localhost:5173',
+    'http://localhost:5174',
     'http://localhost:3000',
     'https://woodshot-frontend.onrender.com'  # Votre URL de production
 ]
