@@ -9,9 +9,9 @@ services:
       - key: FLASK_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://woodshots-frontend.onrender.com
+        value: https://woodshothot.com
       - key: BASE_URL
-        value: https://woodshots-backend.onrender.com
+        value: https://woodshot-backend-um0v.onrender.com
       - key: DATABASE_URL
         value: postgresql://wood_db_7clw_user:TOqXheZfQmBm0C0tJmZrtUbPQrhlGrZx@dpg-d46ftipr0fns73avammg-a.oregon-postgres.render.com/wood_db_7clw
       - key: SECRET_KEY
@@ -45,6 +45,6 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        value: https://woodshots-backend.onrender.com
+        value: https://woodshot-backend-um0v.onrender.com
       - key: VITE_FRONTEND_URL
-        value: https://woodshots-frontend.onrender.com
+        value: https://woodshothot.com
