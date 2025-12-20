@@ -17,54 +17,87 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# ===== CONFIGURATION CORS SIMPLIFIÉE ET EFFICACE =====
+# ===== CONFIGURATION CORS SIMPLIFIÉE ET SÉCURISÉE =====
+# Charger les origines autorisées depuis les variables d'environnement
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 ALLOWED_ORIGINS = [
-    "https://woodshothot.com",
-    "https://woodshot-backend-um0v.onrender.com",
-    "http://localhost:5173",
-    "http://localhost:5174"
+    FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    'https://woodshots-frontend.onrender.com',  # Votre URL de production
+    'https://woodshothot.com'  # Nouveau domaine
 ]
 
-CORS(app, 
-     origins=ALLOWED_ORIGINS,
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"])
+# Configuration CORS complète pour toutes les routes
+CORS(app,
+     resources={
+         r"/*": {  # Appliquer à toutes les routes, pas seulement /api/*
+             "origins": ALLOWED_ORIGINS,
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+             "allow_headers": [
+                 "Content-Type",
+                 "Authorization",
+                 "X-Requested-With",
+                 "Accept",
+                 "Origin",
+                 "X-Admin-Request",
+                 "Access-Control-Request-Method",
+                 "Access-Control-Request-Headers"
+             ],
+             "expose_headers": [
+                 "Content-Type",
+                 "Authorization",
+                 "Access-Control-Allow-Origin",
+                 "Access-Control-Allow-Credentials"
+             ],
+             "supports_credentials": True,
+             "max_age": 86400  # 24 heures
+         }
+     },
+     supports_credentials=True
+)
 
+# ===== HEADERS DE SÉCURITÉ ET CORS =====
 @app.after_request
-def after_request(response):
-    """Ajoute les headers CORS à chaque réponse"""
+def set_security_headers(response):
+    """Ajoute les headers de sécurité et complète CORS si nécessaire"""
+
+    # Headers de sécurité
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+
+    # En production, ajouter HTTPS strict
+    if os.getenv('FLASK_ENV') == 'production':
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+
+    # Headers CORS supplémentaires pour toutes les routes (au cas où Flask-CORS ne les couvre pas)
     origin = request.headers.get('Origin')
     if origin in ALLOWED_ORIGINS:
         response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Access-Control-Allow-Credentials'] = 'true'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin'
-        response.headers['Access-Control-Max-Age'] = '3600'
-    
-    # Headers de sécurité
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Admin-Request, Access-Control-Request-Method, Access-Control-Request-Headers'
+        response.headers['Access-Control-Max-Age'] = '86400'
+
     return response
 
-@app.before_request
-def handle_preflight():
-    """Gère les requêtes OPTIONS (preflight)"""
-    if request.method == "OPTIONS":
-        response = make_response()
-        origin = request.headers.get('Origin')
-        if origin in ALLOWED_ORIGINS:
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin'
-            response.headers['Access-Control-Max-Age'] = '3600'
-        return response, 200
+# Gestion OPTIONS explicite pour toutes les routes
+@app.route('/<path:path>', methods=['OPTIONS'])
+def handle_options_all(path):
+    """Handle OPTIONS requests for all routes"""
+    response = app.make_response('')
+    response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Admin-Request, Access-Control-Request-Method, Access-Control-Request-Headers'
+    response.headers['Access-Control-Max-Age'] = '86400'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response, 200
 
 # Configuration JWT
 app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400  # 24 heures
 jwt = JWTManager(app)
 
 # Configuration Flask-Mail
