@@ -33,8 +33,8 @@ services:
     rootDir: frontend
     buildCommand: npm run build
     staticPublishPath: ./dist
-    routes:
-      - type: redirect
-        source: /*
-        destination: /index.html
-        status: 200
+    envVars:
+      - key: VITE_API_URL
+        value: https://woodshots-backend.onrender.com
+      - key: VITE_FRONTEND_URL
+        value: https://woodshots-frontend.onrender.com

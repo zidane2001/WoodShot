@@ -23,7 +23,7 @@ ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',
-    'https://woodshot-frontend.onrender.com'  # Votre URL de production
+    'https://woodshots-frontend.onrender.com'  # Votre URL de production
 ]
 
 # Configuration CORS complète pour toutes les routes
