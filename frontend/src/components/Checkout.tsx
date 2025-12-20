@@ -83,16 +83,52 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
     try {
       if (formData.paymentMethod === 'bank') {
-        // For bank transfers, create a mock payment response
-        const mockPaymentResponse = {
-          payment_method: 'bank',
-          iban: iban,
+        // For bank transfers, send complete order data to backend
+        const orderData = {
           amount: totalWithDelivery,
+          currency: 'EUR',
+          payment_method: formData.paymentMethod,
+          customer_email: formData.email,
+          customer: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+          },
+          delivery: {
+            address: formData.address,
+            city: formData.city,
+            postalCode: formData.postalCode,
+            date: formData.deliveryDate,
+            time: formData.deliveryTime,
+          },
+          items: state.items,
           order_id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         };
 
+        // Send to backend for processing and email
+        const response = await fetch(`${API_BASE_URL}/api/payments/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || errorData.detail || 'Erreur lors de la création du paiement');
+        }
+
+        const paymentResponse = await response.json();
+
         // Store payment response for success modal
-        localStorage.setItem('paymentResponse', JSON.stringify(mockPaymentResponse));
+        localStorage.setItem('paymentResponse', JSON.stringify({
+          ...paymentResponse,
+          payment_method: 'bank',
+          iban: iban,
+          amount: totalWithDelivery,
+        }));
 
         // Clear cart
         dispatch({ type: 'CLEAR_CART' });
@@ -103,20 +139,14 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         return;
       }
 
-      // Create payment request data for crypto payments
-      const paymentData = {
+      // Create complete order data for backend
+      const orderData = {
         amount: totalWithDelivery,
         currency: 'EUR',
         payment_method: formData.paymentMethod,
         crypto_currency: formData.cryptoCurrency,
         order_id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         customer_email: formData.email,
-        customer_name: `${formData.firstName} ${formData.lastName}`,
-        description: `Commande WoodShot - ${state.items.length} article(s) - Total: ${totalWithDelivery.toFixed(2)}€`,
-      };
-
-      // Create order data for backend
-      const orderData = {
         customer: {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -131,26 +161,20 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           time: formData.deliveryTime,
         },
         items: state.items,
-        total: totalWithDelivery,
-        paymentMethod: formData.paymentMethod,
-        cryptoCurrency: formData.cryptoCurrency,
-        cryptoWallet: formData.cryptoWallet,
-        orderId: paymentData.order_id,
       };
 
       console.log('Order data:', orderData);
-      console.log('Payment data:', paymentData);
       console.log('Cart state:', state);
       console.log('Total with delivery:', totalWithDelivery);
       console.log('Delivery fee:', deliveryFee);
 
       // Call backend payment API for crypto payments
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create`, {
+      const response = await fetch(`${API_BASE_URL}/api/payments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(paymentData),
+        body: JSON.stringify(orderData),
       });
 
       if (!response.ok) {

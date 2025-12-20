@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, make_response, redirect
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_mail import Mail, Message
 from sqlalchemy.orm import Session
 from database import get_db, engine, Base
 from models import Product, Inventory, User, Address, Order, OrderItem, Delivery, HeroImage, Settings
@@ -10,6 +11,7 @@ import cloudinary
 import cloudinary.uploader
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
+from threading import Thread
 
 load_dotenv()
 
@@ -97,6 +99,17 @@ app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400  # 24 heures
 jwt = JWTManager(app)
 
+# Configuration Flask-Mail
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False').lower() == 'true'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', app.config['MAIL_USERNAME'])
+
+mail = Mail(app)
+
 # Cloudinary config
 cloudinary.config(
     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
@@ -121,6 +134,97 @@ def upload_to_cloudinary(file, folder="woodshot/products"):
     except Exception as e:
         print(f"Cloudinary upload error: {e}")
         return None
+
+def send_order_confirmation_email(order_data, customer_email):
+    """Send order confirmation email to customer"""
+    try:
+        # Create HTML email content
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Confirmation de commande - WoodShot</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }}
+                .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; }}
+                .header {{ background-color: #059669; color: white; padding: 20px; text-align: center; }}
+                .content {{ padding: 30px; }}
+                .order-details {{ background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }}
+                .footer {{ background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }}
+                .button {{ display: inline-block; background-color: #059669; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎉 Commande Confirmée !</h1>
+                    <p>Merci pour votre confiance, {order_data['customer']['firstName']} !</p>
+                </div>
+
+                <div class="content">
+                    <h2>Détails de votre commande</h2>
+                    <p><strong>Numéro de commande:</strong> {order_data['orderId']}</p>
+                    <p><strong>Date:</strong> {new Date().toLocaleDateString('fr-FR')}</p>
+
+                    <div class="order-details">
+                        <h3>📦 Articles commandés</h3>
+                        {"".join(f"<p>• {item['product']['name']} - Quantité: {item['quantity']} - {item['totalPrice']}€</p>" for item in order_data['items'])}
+                        <hr>
+                        <p><strong>Total: {order_data['total']}€</strong></p>
+                    </div>
+
+                    <div class="order-details">
+                        <h3>🚚 Adresse de livraison</h3>
+                        <p>{order_data['delivery']['address']}</p>
+                        <p>{order_data['delivery']['postalCode']} {order_data['delivery']['city']}</p>
+                        {"<p><strong>Date souhaitée:</strong> " + order_data['delivery']['date'] + "</p>" if order_data['delivery'].get('date') else ""}
+                        {"<p><strong>Créneau:</strong> " + order_data['delivery']['time'] + "</p>" if order_data['delivery'].get('time') else ""}
+                    </div>
+
+                    <div class="order-details">
+                        <h3>💳 Informations de paiement</h3>
+                        <p><strong>Méthode:</strong> {order_data['paymentMethod'] == 'bank' and 'Virement bancaire' or 'Cryptomonnaie'}</p>
+                        {"<p><strong>Cryptomonnaie:</strong> " + order_data['cryptoCurrency'].upper() + "</p>" if order_data.get('cryptoCurrency') else ""}
+                        <p style="color: #dc2626; font-weight: bold;">
+                            ⚠️ Important: Veuillez envoyer une capture d'écran de votre paiement au +1 (343) 453-6714
+                        </p>
+                    </div>
+
+                    <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+
+                    <a href="{os.getenv('FRONTEND_URL', 'http://localhost:5174')}" class="button">Voir mes commandes</a>
+                </div>
+
+                <div class="footer">
+                    <p>WoodShot SARL - Bois de chauffage premium</p>
+                    <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        # Create and send email
+        msg = Message(
+            subject=f"Confirmation de commande #{order_data['orderId']} - WoodShot",
+            recipients=[customer_email],
+            html=html_content
+        )
+
+        # Send email asynchronously to avoid blocking
+        def send_async():
+            with app.app_context():
+                mail.send(msg)
+
+        Thread(target=send_async).start()
+
+        print(f"Order confirmation email sent to {customer_email} for order {order_data['orderId']}")
+
+    except Exception as e:
+        print(f"Error sending order confirmation email: {e}")
+        # Don't raise exception to avoid breaking the order process
 
 # ===== ROUTES =====
 
@@ -898,6 +1002,63 @@ def create_payment():
         print(f"Payment request received: {data}")
 
         payment_method = data.get('payment_method', 'bank')
+
+        # Create order in database first
+        db: Session = next(get_db())
+
+        # Calculate total amount and create order items
+        total_amount = data.get('amount', 0)
+        order_items = []
+
+        for item_data in data.get('items', []):
+            product = db.query(Product).filter_by(id=item_data['product']['id']).first()
+            if not product:
+                return jsonify({'error': f'Product {item_data["product"]["id"]} not found'}), 404
+
+            quantity = item_data['quantity']
+            unit_price = float(product.price_per_unit)
+            total_price = unit_price * quantity
+
+            order_item = OrderItem(
+                product_id=product.id,
+                quantity=quantity,
+                unit_price=unit_price,
+                total_price=total_price
+            )
+            order_items.append(order_item)
+
+        # Create order
+        order = Order(
+            user_id=None,  # Anonymous order for now
+            total_amount=total_amount,
+            status='pending'
+        )
+        db.add(order)
+        db.commit()
+        db.refresh(order)
+
+        # Add order items
+        for item in order_items:
+            item.order_id = order.id
+            db.add(item)
+
+        db.commit()
+
+        # Prepare order data for email
+        order_data = {
+            'orderId': f"WS-{order.id}",
+            'customer': data.get('customer', {}),
+            'delivery': data.get('delivery', {}),
+            'items': data.get('items', []),
+            'total': total_amount,
+            'paymentMethod': payment_method,
+            'cryptoCurrency': data.get('crypto_currency')
+        }
+
+        # Send confirmation email
+        customer_email = data.get('customer_email')
+        if customer_email:
+            send_order_confirmation_email(order_data, customer_email)
 
         if payment_method == 'crypto':
             return create_crypto_payment(data)
