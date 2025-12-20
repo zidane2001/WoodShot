@@ -11,15 +11,19 @@ services:
       - key: FRONTEND_URL
         value: https://woodshothot.com
       - key: BASE_URL
-        value: https://woodshot-backend-um0v.onrender.com
+        value: https://api.woodshothot.com
       - key: DATABASE_URL
-        value: postgresql://wood_db_7clw_user:TOqXheZfQmBm0C0tJmZrtUbPQrhlGrZx@dpg-d46ftipr0fns73avammg-a.oregon-postgres.render.com/wood_db_7clw
+        value: postgresql://neondb_owner:npg_oecQ7JkxuDI5@ep-hidden-meadow-ago3spu0-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       - key: SECRET_KEY
         value: 5hqsYxORrb9ZR8ClDH7ay4HrhPJ2QJ1feqHqVyOayrg
       - key: ADMIN_PIN
         value: 2017
+      - key: JWT_SECRET_KEY
+        value: woodshot_secure_jwt_key_2024
       - key: NOWPAYMENTS_API_KEY
-        value: uGqlVng6ng9v5kQ07Q/I02XeLRoyKShz
+        value: NMB5KZX-RZ6MRXB-MP28X3N-4YND23Y
+      - key: NOWPAYMENTS_PUBLIC_KEY
+        value: cfe33899-95ce-4178-8540-1e1204ab323c
       - key: CLOUDINARY_CLOUD_NAME
         value: djxiszqgd
       - key: CLOUDINARY_API_KEY
@@ -33,9 +37,9 @@ services:
       - key: MAIL_USE_TLS
         value: "true"
       - key: MAIL_USERNAME
-        value: "colliselect@gmail.com"
+        value: colliselect@gmail.com
       - key: MAIL_PASSWORD
-        value: "your-app-password"
+        value: ton_app_password_gmail_ici
 
   - type: web
     name: woodshots-frontend
@@ -45,6 +49,6 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        value: https://woodshot-backend-um0v.onrender.com
+        value: https://api.woodshothot.com
       - key: VITE_FRONTEND_URL
         value: https://woodshothot.com
