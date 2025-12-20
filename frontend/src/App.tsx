@@ -11,6 +11,7 @@ import Contact from './components/Contact';
 import About from './components/About';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import FloatingWhatsAppButton from './components/FloatingWhatsAppButton';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -47,6 +48,7 @@ function MainLayout() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
       <Footer />
+      <FloatingWhatsAppButton />
     </div>
   );
 }
