@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
+import { PaymentSuccessModal } from './PaymentSuccess';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -38,6 +39,7 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [iban, setIban] = useState<string>('Chargement...');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const tomorrow = useMemo(() => {
     const now = new Date().getTime();
     return new Date(now + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -89,12 +91,15 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           order_id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         };
 
-        // Store payment response for success page
+        // Store payment response for success modal
         localStorage.setItem('paymentResponse', JSON.stringify(mockPaymentResponse));
 
         // Clear cart
         dispatch({ type: 'CLEAR_CART' });
-        window.location.href = '/payment/success';
+
+        // Show success modal instead of redirecting
+        setIsProcessing(false);
+        setShowSuccessModal(true);
         return;
       }
 
@@ -159,11 +164,12 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       // Clear cart
       dispatch({ type: 'CLEAR_CART' });
 
-      // Store payment response for success page
+      // Store payment response for success modal
       localStorage.setItem('paymentResponse', JSON.stringify(paymentResponse));
 
-      // For crypto payments, redirect to payment URL
-      window.location.href = paymentResponse.payment_url;
+      // For crypto payments, show success modal with payment instructions
+      setIsProcessing(false);
+      setShowSuccessModal(true);
 
     } catch (error) {
       console.error('Payment error:', error);
@@ -628,6 +634,15 @@ const Checkout: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* Payment Success Modal */}
+      <PaymentSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          onClose(); // Close the checkout modal as well
+        }}
+      />
     </div>
   );
 };

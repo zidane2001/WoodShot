@@ -11,7 +11,6 @@ import Contact from './components/Contact';
 import About from './components/About';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
-import PaymentSuccess from './components/PaymentSuccess';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -46,7 +45,6 @@ function MainLayout() {
         <Route path="/about" element={<About />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/payment/success" element={<PaymentSuccess />} />
       </Routes>
       <Footer />
     </div>
